@@ -1,0 +1,5 @@
+To run unit tests in tonic.specedit
+
+> python tonic/specedit/gentest.py
+> nosetsets
+
