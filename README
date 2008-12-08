@@ -3,3 +3,8 @@ To run unit tests in tonic.specedit
 > python tonic/specedit/gentest.py
 > nosetsets
 
+
+Changes from 0.0.1
+ * added lineparser and specedit
+ * binarian become independent software package.
+

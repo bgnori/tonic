@@ -24,18 +24,8 @@ class RegExpCompositionMeta(type):
 
 class LineParser(object):
   __metaclass__ = RegExpCompositionMeta
-  name = '???'
   _first = EMPTY
   _last = EMPTY
-  #_compiled = None
-  def __init__(self, parent, debug=None):
-    self.debug = debug
-    self.parent = parent
-    self.oninit()
-
-  def oninit(self):pass
-  def done(self):pass
-
   def parse(self, line):
     for matchobj in self.regexp.finditer(line):
       for name, match in matchobj.groupdict().items():
@@ -43,9 +33,5 @@ class LineParser(object):
           handler_name = 'handle_' + name
           handler = getattr(self, handler_name, None)
           if handler:
-            if self.debug:
-              print '  where:', line
-              print ' envoke:', handler_name
-              print '     by:', self
-            handler(match, matchobj)
+            return handler(match, matchobj)
 

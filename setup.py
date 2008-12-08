@@ -2,10 +2,11 @@
 # -*- coding: us-ascii -*-
 # vim: syntax=python
 #
-# Copyright 2006-2008 Noriyuki Hosaka nori@backgammon.gr.jp
+# Copyright 2006-2008 Noriyuki Hosaka bgnori@gmail.com
 #
+
 from distutils.core import setup
-import os, os.path
+import os
 
 
 NAME = 'python-tonic-library'
@@ -17,8 +18,10 @@ This package contains:
  * turbogears:
   * cc: decorators for cache-control.
   * widget: original widgets.
+
  * lineparser
   * parsing line oriented data.
+
  * specedit
   * reader/writer for spef file of RPM.
   * It uses elementtree a.k.a xml.etree in python 2.5 or later, for intermediate expression.
@@ -62,8 +65,8 @@ setup(
       "Development Status :: 3 - Alpha",
       "Operating System :: OS Independent",
       "Intended Audience :: Developers",
-      "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
       "Framework :: TurboGears",
+      "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
       "Topic :: Text Processing",
       "Topic :: Software Development",
       "Topic :: System :: Archiving :: Packaging",

@@ -5,12 +5,9 @@
 # Copyright 2008 Noriyuki Hosaka bgnori@gmail.com
 #
 import StringIO
-
 import unittest
-import nose
 
 from tonic.funny import LooseQuacker as Mock
-
 from tonic import specedit
 from tonic.specedit import base
 
@@ -24,24 +21,12 @@ class SpecTest(unittest.TestCase):
   def tearDown(self):
     pass
 
-class LineParserTest(unittest.TestCase):
-  def setUp(self):
-    self.parser = base.LineParser(parser_mock)
-  def tearDown(self):
-    pass
-  def test_none(self):
-    pass
-  def test_regexp(self):
-    r = self.parser.regexp
-    self.assert_(r is not None)
-  def test_nullline(self):
-    self.parser.parse('')
-
 class ParserTest(unittest.TestCase):
   def setUp(self):
     self.source = file('./tonic/specedit/testdata/gauche.spec')
     self.parser = specedit.Parser()
     self.root = self.parser.parse(self.source)
+
   def tearDown(self):
     self.source.close()
 

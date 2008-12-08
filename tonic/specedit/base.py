@@ -16,6 +16,10 @@ class CommentParser(LineParser):
              r'''(^#(?P<comment>.*))'''
             )
   _last = EMPTY
+  def __init__(self, parent, debug=None):
+    self.debug = debug
+    self.parent = parent
+    self.oninit()
   def oninit(self):
     self.parent.subelement(self.name)
   def done(self):
@@ -278,7 +282,7 @@ class ChangeLogParser(CommentParser):
 def makebundle():
   d = dict()
   for key, item in globals().items():
-    if isinstance(item, type) and issubclass(item, LineParser):
+    if isinstance(item, type) and issubclass(item, CommentParser):
       d.update({item.name: item})
   return d
   
