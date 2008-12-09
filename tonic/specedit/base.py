@@ -164,7 +164,9 @@ class BuildParser(StepParser):
   _first = (
              r'''(^%build *(?P<build_arg>.*))'''
              r'''|'''
-             r'''((?P<ifarch>^%ifarch) *(?P<cond>.*))'''
+             r'''((?P<ifarch>^%ifarch) *(?P<ifarch_cond>.*))'''
+             r'''|'''
+             r'''((?P<if>^%if) *(?P<if_cond>.*))'''
              r'''|'''
              r'''(?P<else>^%else)'''
              r'''|'''
@@ -176,7 +178,12 @@ class BuildParser(StepParser):
   def handle_ifarch(self, match, matchobj):
     self.parent.subelement('ifarch')
     d = matchobj.groupdict()
-    self.parent.current.attrib['cond'] = d['cond']
+    self.parent.current.attrib['cond'] = d['ifarch_cond']
+    self.parent.subelement('then')
+  def handle_if(self, match, matchobj):
+    self.parent.subelement('if')
+    d = matchobj.groupdict()
+    self.parent.current.attrib['cond'] = d['if_cond']
     self.parent.subelement('then')
   def handle_else(self, match, matchobj):
     assert self.parent.current.tag == 'then'
@@ -185,7 +192,7 @@ class BuildParser(StepParser):
   def handle_endif(self, match, matchobj):
     assert self.parent.current.tag == 'else'
     self.parent.pop()
-    assert self.parent.current.tag == 'ifarch'
+    assert self.parent.current.tag in ('ifarch', 'if')
     self.parent.pop()
 
 
@@ -222,7 +229,10 @@ class PostParser(StepParser):
 class FilesParser(CommentParser):
   name = 'files'
   _first =  (
-      r'''(^%files *(?P<files_arg>[^ ]*) *(?P<files_option>.*))'''
+      r'''(^%files('''
+        r'''( +(?P<files_name>[^ ]+))?'''
+        r'''( +(?P<files_option>.*))?'''
+        r''')?)'''
       r'''|'''
       r'''(^%doc +(?P<doc>(([0-9a-zA-Z.-]+) ?)+))'''
       r'''|'''
@@ -236,10 +246,15 @@ class FilesParser(CommentParser):
       r'''(?P<path>^(/[a-zA-Z0-9._%{}-]+)+/?)'''
       )
   _last = EMPTY
-  def handle_files_arg(self, match, matchobj):
-    self.parent.current.attrib['name'] = match
-  def handle_files_option(self, match, matchobj):
-    self.parent.current.attrib['option'] = match
+  def handle_files_name(self, match, matchobj):
+    #print 'handle_files_name', match
+    d = matchobj.groupdict()
+    self.parent.current.attrib['name'] = d['files_name']
+    self.parent.current.attrib['option'] = d['files_option']
+  #def handle_files_option(self, match, matchobj):
+  #  print 'handle_files_option', match
+  #self.parent.current.attrib['option'] = match
+
   def handle_doc(self, match, matchobj):
     assert self.parent.current.tag == 'files'
     self.parent.subelement('doc')
@@ -441,10 +456,16 @@ class Writer(object):
       f.write('%%build %s\n'%name)
     else:
       f.write('%build\n')
+
   def handle_ifarch(self, t, f):
     cond = t.get('cond', None)
     assert cond
     f.write('%%ifarch %s\n'%cond)
+
+  def handle_if(self, t, f):
+    cond = t.get('cond', None)
+    assert cond
+    f.write('%%if %s\n'%cond)
 
   def handle_then(self, t, f):pass
   def handle_else(self, t, f):

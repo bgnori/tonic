@@ -27,6 +27,7 @@ class ParserTest(unittest.TestCase):
     self.p = A()
   def tearDown(self):
     pass
+
   def test_parse(self):
     p = self.p
     self.assert_(p.parse('first'))

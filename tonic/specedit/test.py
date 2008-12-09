@@ -35,7 +35,7 @@ class ParserTest(unittest.TestCase):
 
   def assertAttribute(self, node, name, text):
     a = node.get(name)
-    self.assert_(a)
+    self.assert_(a is not None)
     self.assertEqual(a, text)
 
   def assertDefine(self, node, name, value):
@@ -183,6 +183,11 @@ package as well.
   def test_files(self):
     files = self.root.find('files[@name="common"]')
     self.assert_(files is not None)
+    print files
+    for name, value in files.attrib.items():
+      print name, value 
+    for n in files:
+      print n
     self.assertAttribute(files, "option", "-f rpmfiles-common.txt")
     defattr = files.find('defattr')
     self.assert_(defattr is not None)
