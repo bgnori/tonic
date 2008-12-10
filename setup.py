@@ -25,6 +25,7 @@ This package contains:
  * specedit
   * reader/writer for spef file of RPM.
   * It uses elementtree a.k.a xml.etree in python 2.5 or later, for intermediate expression.
+  * It uses feature in originally packaged elementtree for testing.
 """
 HOMEPAGE = "http://www.tonic-water.com/"
 
@@ -55,6 +56,7 @@ setup(
   install_requires = [
     "python>=2.4",
     "TurboGears>=1.0.0",
+    "python-elementtree>=1.3.a3", 
   ],
   author=AUTHOR[0],
   author_email=AUTHOR[1],

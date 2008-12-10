@@ -1,6 +1,7 @@
 setup.cfg
 setup.py
 VERSION
+MANIFEST
 tonic/__init__.py
 tonic/funny.py
 tonic/turbogears/__init__.py
@@ -8,6 +9,7 @@ tonic/turbogears/cc.py
 tonic/turbogears/widgets.py
 tonic/lineparser.py
 tonic/specedit/__init__.py
+tonic/specedit/base.py
 tonic/specedit/dump.py
 tonic/specedit/gentest.py
 tonic/specedit/pw.py
