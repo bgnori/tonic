@@ -23,6 +23,7 @@ class CommentParser(LineParser):
   def oninit(self):
     self.parent.subelement(self.name)
   def done(self):
+    assert self.parent.current.tag == self.name
     self.parent.pop()
   def handle_comment(self, match, matchobj):
     self.parent.subelement('comment')
@@ -164,13 +165,13 @@ class BuildParser(StepParser):
   _first = (
              r'''(^%build *(?P<build_arg>.*))'''
              r'''|'''
-             r'''((?P<ifarch>^%ifarch) *(?P<ifarch_cond>.*))'''
+             r'''((?P<ifarch>^%ifarch) +(?P<ifarch_cond>.+))'''
              r'''|'''
-             r'''((?P<if>^%if) *(?P<if_cond>.*))'''
+             r'''((?P<if>^%if) +(?P<if_cond>.+))'''
              r'''|'''
              r'''(?P<else>^%else)'''
              r'''|'''
-             r'''(?P<endif>^%endif)'''
+             r'''(?P<endif>^%endif.*)'''
            )
   _last = EMPTY
   def handle_build_arg(self, match, matchobj):
@@ -179,21 +180,28 @@ class BuildParser(StepParser):
     self.parent.subelement('ifarch')
     d = matchobj.groupdict()
     self.parent.current.attrib['cond'] = d['ifarch_cond']
+    assert self.parent.current.attrib['cond']
     self.parent.subelement('then')
   def handle_if(self, match, matchobj):
     self.parent.subelement('if')
     d = matchobj.groupdict()
     self.parent.current.attrib['cond'] = d['if_cond']
+    assert self.parent.current.attrib['cond']
     self.parent.subelement('then')
   def handle_else(self, match, matchobj):
     assert self.parent.current.tag == 'then'
     self.parent.pop()
     self.parent.subelement('else')
   def handle_endif(self, match, matchobj):
-    assert self.parent.current.tag == 'else'
-    self.parent.pop()
+    if self.parent.current.tag == 'then':
+      self.parent.pop()
+    if self.parent.current.tag == 'else':
+      self.parent.pop()
+    #self.parent.subelement('endif')
+    #self.parent.pop()
     assert self.parent.current.tag in ('ifarch', 'if')
     self.parent.pop()
+    assert self.parent.current.tag == 'build'
 
 
 class InstallParser(StepParser):
@@ -230,7 +238,7 @@ class FilesParser(CommentParser):
   name = 'files'
   _first =  (
       r'''(^%files('''
-        r'''( +(?P<files_name>[^ ]+))?'''
+        r'''( +(?P<files_name>[^ \n]+))?'''
         r'''( +(?P<files_option>.*))?'''
         r''')?)'''
       r'''|'''
@@ -393,7 +401,14 @@ class Parser(object):
       pprint.pprint((i+1, self.curr_line))
       raise
     self.current_parser.done()
-    assert len(self.stack) == 1 #just root is there.
+    if not len(self.stack) == 1:
+      #just root is there.
+      print 'bad stack content'
+      for n in self.stack:
+        print n
+        for name, value in n.attrib.items():
+          print name, value
+      raise
     return self.current
 
   
@@ -402,16 +417,20 @@ class Writer(object):
     pass
 
   def write(self, t, f):
-    handler_name = 'handle_' + t.tag
+    handler_name = 'in_' + t.tag
     handler = getattr(self, handler_name, None)
-    assert handler, handler_name
-    handler(t, f)
+    if handler:
+      handler(t, f)
     for c in t:
       self.write(c, f)
+    handler_name = 'out_' + t.tag
+    handler = getattr(self, handler_name, None)
+    if handler:
+      handler(t, f)
 
-  def handle_spec(self, t, f):pass
-  def handle_head(self, t, f):pass
-  def handle_package(self, t, f):
+  def in_spec(self, t, f):pass
+  def in_head(self, t, f):pass
+  def in_package(self, t, f):
     name = t.get('name', None)
     if name:
       f.write('%%package %s\n'%name)
@@ -421,11 +440,11 @@ class Writer(object):
       if name[0].isupper():
         f.write('%s: %s\n'%(name, value))
 
-  def handle_comment(self, t, f):
+  def in_comment(self, t, f):
     f.write('#%s\n'%t.text)
-  def handle_define(self, t, f):
+  def in_define(self, t, f):
     f.write('%%define %s %s\n'%(t.attrib['name'], t.attrib['value']))
-  def handle_description(self, t, f):
+  def in_description(self, t, f):
     name = t.get('name', None)
     if name:
       f.write('%%description %s\n'%name)
@@ -436,89 +455,91 @@ class Writer(object):
 
     f.write('\n')
 
-  def handle_prep(self, t, f):
+  def in_prep(self, t, f):
     name = t.get('name', None)
     if name:
       f.write('%%prep %s\n'%name)
     else:
       f.write('%prep\n')
 
-  def handle_setup(self, t, f):
+  def in_setup(self, t, f):
     arg = t.text
     if arg:
       f.write('%%setup %s\n'%arg)
     else:
       f.write('%setup\n')
 
-  def handle_build(self, t, f):
+  def in_build(self, t, f):
     name = t.get('name', None)
     if name:
       f.write('%%build %s\n'%name)
     else:
       f.write('%build\n')
 
-  def handle_ifarch(self, t, f):
+  def in_ifarch(self, t, f):
     cond = t.get('cond', None)
     assert cond
     f.write('%%ifarch %s\n'%cond)
+  def out_ifarch(self, t, f):
+    f.write('%endif\n')
 
-  def handle_if(self, t, f):
+  def in_if(self, t, f):
     cond = t.get('cond', None)
     assert cond
     f.write('%%if %s\n'%cond)
-
-  def handle_then(self, t, f):pass
-  def handle_else(self, t, f):
-    f.write('%else\n')
-  def handle_endif(self, t, f):
+  def out_if(self, t, f):
     f.write('%endif\n')
 
-  def handle_step(self, t, f):
+  def in_then(self, t, f):pass
+  def in_else(self, t, f):
+    f.write('%else\n')
+
+  def in_step(self, t, f):
     f.write('%s\n'%t.text)
 
-  def handle_install(self, t, f):
+  def in_install(self, t, f):
     name = t.get('name', None)
     if name:
       f.write('%%install %s\n'%name)
     else:
       f.write('%install\n')
 
-  def handle_clean(self, t, f):
+  def in_clean(self, t, f):
     name = t.get('name', None)
     if name:
       f.write('%%clean %s\n'%name)
     else:
       f.write('%clean\n')
 
-  def handle_post(self, t, f):
+  def in_post(self, t, f):
     name = t.get('name', None)
     if name:
       f.write('%%post %s\n'%name)
     else:
       f.write('%post\n')
 
-  def handle_files(self, t, f):
+  def in_files(self, t, f):
     name = t.get('name', None)
     if name:
       f.write('%%files %s\n'%name)
     else:
       f.write('%files\n')
 
-  def handle_defattr(self, t, f):
+  def in_defattr(self, t, f):
     f.write('%%defattr(%s,%s,%s)\n'%\
               (t.attrib['1'], t.attrib['2'], t.attrib['3']))
 
-  def handle_doc(self, t, f):
+  def in_doc(self, t, f):
       s = ' '.join([c.get('value') for c in t])
       f.write('%%doc %s\n'%s)
 
-  def handle_file(self, t, f):pass
-  def handle_item(self, t, f):
+  def in_file(self, t, f):pass
+  def in_item(self, t, f):
     path = t.get('value', None)
     assert path
     f.write('%s\n'%path)
 
-  def handle_changelog(self, t, f):
+  def in_changelog(self, t, f):
     name = t.get('name', None)
     if name:
       f.write('%%changelog %s\n'%name)
