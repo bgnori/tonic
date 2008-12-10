@@ -83,30 +83,36 @@ class PackageParser(CommentParser):
   def handle_package_arg(self, match, matchobj):
     self.parent.current.attrib['name'] = match
 
+  def package_info(self, name, value):
+    self.parent.subelement('package_info')
+    self.parent.current.attrib['name'] = name
+    self.parent.current.attrib['value'] = value
+    self.parent.pop()
+
   def handle_Name(self, match, matchobj):
-    self.parent.current.attrib['Name'] = match
+    self.package_info('Name', match)
   def handle_Summary(self, match, matchobj):
-    self.parent.current.attrib['Summary'] = match
+    self.package_info('Summary', match)
   def handle_Version(self, match, matchobj):
-    self.parent.current.attrib['Version'] = match
+    self.package_info('Version', match)
   def handle_Release(self, match, matchobj):
-    self.parent.current.attrib['Release'] = match
+    self.package_info('Release', match)
   def handle_Source(self, match, matchobj):
-    self.parent.current.attrib['Source'] = match
+    self.package_info('Source', match)
   def handle_License(self, match, matchobj):
-    self.parent.current.attrib['License'] = match
+    self.package_info('License', match)
   def handle_Requires(self, match, matchobj):
-    self.parent.current.attrib['Requires'] = match
+    self.package_info('Requires', match)
   def handle_Provides(self, match, matchobj):
-    self.parent.current.attrib['Provides'] = match
+    self.package_info('Provides', match)
   def handle_Group(self, match, matchobj):
-    self.parent.current.attrib['Group'] = match
+    self.package_info('Group', match)
   def handle_Packager(self, match, matchobj):
-    self.parent.current.attrib['Packager'] = match
+    self.package_info('Packager', match)
   def handle_Buildroot(self, match, matchobj):
-    self.parent.current.attrib['Buildroot'] = match
+    self.package_info('Buildroot', match)
   def handle_URL(self, match, matchobj):
-    self.parent.current.attrib['URL'] = match
+    self.package_info('URL', match)
 
 class DescriptionParser(CommentParser):
   name = 'description'
@@ -436,9 +442,11 @@ class Writer(object):
       f.write('%%package %s\n'%name)
     else:
       pass #main package
-    for name, value in t.attrib.items():
-      if name[0].isupper():
-        f.write('%s: %s\n'%(name, value))
+
+  def in_package_info(self, t, f):
+    name = t.get('name')
+    value = t.get('value')
+    f.write('%s: %s\n'%(name, value))
 
   def in_comment(self, t, f):
     f.write('#%s\n'%t.text)

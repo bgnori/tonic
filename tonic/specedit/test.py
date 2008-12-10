@@ -38,6 +38,11 @@ class ParserTest(unittest.TestCase):
     self.assert_(a is not None)
     self.assertEqual(a, text)
 
+  def assertPackageInfo(self, node, name, value):
+    self.assertEqual(node.tag, 'package_info')
+    self.assertAttribute(node, 'name', name)
+    self.assertAttribute(node, 'value', value)
+
   def assertDefine(self, node, name, value):
     self.assertEqual(node.get('name'), name)
     self.assertEqual(node.get('value'), value)
@@ -62,22 +67,27 @@ class ParserTest(unittest.TestCase):
     self.assert_(package is not None)
     self.assertEqual(package.tag, 'package')
 
+    self.assertEqual(len(package), 10 + 1 + 1)
     #first package is main package.
-    self.assertAttribute(package, 'Summary', 
+    summary, name, version, release, \
+    source, license, group, packager, \
+    buildroot, url, comment, \
+    description = [n for n in package]
+
+    self.assertPackageInfo(summary,
+                        'Summary',
                         "Scheme script interpreter "
                         "with multibyte character handling")
-    self.assertAttribute(package, 'Name', "Gauche")
-    self.assertAttribute(package, 'Release', "1")
-    self.assertAttribute(package, 'License', "revised BSD")
-    self.assertAttribute(package, 'Group', "Development/Languages")
-    self.assertAttribute(package, 'Packager', "Shiro Kawai (shiro@acm.org)")
-    self.assertAttribute(package, 'Buildroot', "%{_tmppath}/rpm")
-    self.assertAttribute(package, 'URL', "http://practical-scheme.net/gauche/")
-    
+    self.assertPackageInfo(name, 'Name', "Gauche")
+    self.assertPackageInfo(version, 'Version', "%{version}")
+    self.assertPackageInfo(release, 'Release', "1")
+    self.assertPackageInfo(license, 'License', "revised BSD")
+    self.assertPackageInfo(group, 'Group', "Development/Languages")
+    self.assertPackageInfo(packager, 'Packager', "Shiro Kawai (shiro@acm.org)")
+    self.assertPackageInfo(buildroot, 'Buildroot', "%{_tmppath}/rpm")
+    self.assertPackageInfo(url, 'URL', "http://practical-scheme.net/gauche/")
+    self.assertEqual(comment.text, 'Prefix: /usr')
 
-    descriptions = list(package.findall('description'))
-    self.assertEqual(len(descriptions), 1)
-    description = descriptions[0]
     self.assertEqual(description.text,
 """Gauche is a Scheme interpreter conforming Revised^5 Report on
 Algorithmic Language Scheme.  It is designed for rapid development
@@ -87,14 +97,15 @@ It can handle multibyte character strings natively.
   def test_package1(self):
     package = self.root.find('package[@name="%{encoding}"]')
     self.assert_(package is not None)
-    self.assertAttribute(package, 'Summary',
+    summary, group, provides, license, requires, \
+    description = [n for n in package]
+    self.assertPackageInfo(summary, 'Summary',
          "Scheme script interpreter with multibyte "
          "character handling")
-    self.assertAttribute(package, 'Group', "Development/Languages")
-    self.assertAttribute(package, 'Provides', "Gauche libgauche.so")
-    self.assertAttribute(package, 'License', "revised BSD")
-    self.assertAttribute(package, 'Requires', "Gauche-common")
-    description = package.find('description')
+    self.assertPackageInfo(group, 'Group', "Development/Languages")
+    self.assertPackageInfo(provides, 'Provides', "Gauche libgauche.so")
+    self.assertPackageInfo(license, 'License', "revised BSD")
+    self.assertPackageInfo(requires, 'Requires', "Gauche-common")
     self.assertAttribute(description, 'name', "%{encoding}")
     self.assertEqual(description.text,
 """Gauche is a Scheme interpreter conforming Revised^5 Report on
@@ -106,12 +117,14 @@ This package is compiled with %{encoding} as the native character encoding.
 
   def test_package2(self):
     package = self.root.find("package[@name='common']")
-    self.assertAttribute(package, 'Summary',
+    summary, group, license, description = [n for n in package]
+
+    self.assertPackageInfo(summary, 'Summary',
         "Scheme script interpreter with multibyte "
         "character handling")
-    self.assertAttribute(package, "Group", "Development/Languages")
-    self.assertAttribute(package, "License", "revised BSD")
-    description = package.find('description')
+    self.assertPackageInfo(group, "Group", "Development/Languages")
+    self.assertPackageInfo(license, "License", "revised BSD")
+
     self.assertAttribute(description, 'name', "common")
     self.assertEqual(description.text,
 """Gauche is a Scheme interpreter conforming Revised^5 Report on
@@ -126,12 +139,13 @@ package as well.
   def test_package3(self):
     package = self.root.find('package[@name="gdbm-%{encoding}"]')
     self.assert_(package is not None)
-    self.assertAttribute(package, 'Summary', "gdbm binding for Gauche Scheme system")
-    self.assertAttribute(package, "Group", "Development/Languages")
-    self.assertAttribute(package, "License", "GPL")
-    self.assertAttribute(package, "Provides", "Gauche-gdbm")
-    self.assertAttribute(package, "Requires", "gdbm >= 1.8.0, Gauche-%{encoding}")
-    description = package.find('description')
+
+    self.assertPackageInfo(package[0], 'Summary', "gdbm binding for Gauche Scheme system")
+    self.assertPackageInfo(package[1], "Group", "Development/Languages")
+    self.assertPackageInfo(package[2], "License", "GPL")
+    self.assertPackageInfo(package[3], "Provides", "Gauche-gdbm")
+    self.assertPackageInfo(package[4], "Requires", "gdbm >= 1.8.0, Gauche-%{encoding}")
+    description = package[5]
     self.assertAttribute(description, 'name', "gdbm-%{encoding}")
     self.assertEqual(description.text, """This package adds gdbm binding to the Gauche Scheme system.\n""")
 
