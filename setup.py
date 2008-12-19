@@ -26,6 +26,14 @@ This package contains:
   * reader/writer for spef file of RPM.
   * It uses elementtree a.k.a xml.etree in python 2.5 or later, for intermediate expression.
   * It uses feature in originally packaged elementtree for testing.
+ * cache
+  * interface/implementation for cache something. 
+  * supports
+   * using dict
+   * using disk
+   * using file (key for get/set must be valid path)
+   * using memcache
+  * multithread is currently NOT supported
 """
 HOMEPAGE = "http://www.tonic-water.com/"
 
@@ -47,6 +55,7 @@ setup(
   package_dir={'tonic':'tonic', }, #root
   packages=['tonic',
             'tonic.turbogears',
+            'tonic.cache',
            ],
   package_data = {},
   py_modules=[
@@ -72,6 +81,7 @@ setup(
       "Topic :: Text Processing",
       "Topic :: Software Development",
       "Topic :: System :: Archiving :: Packaging",
+      "Topic :: Software Development :: Build Tools",
       ]
 )
 

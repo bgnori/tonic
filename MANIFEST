@@ -27,3 +27,11 @@ tonic/specedit/testdata/wxGTK.spec
 tonic/specedit/testdata/wxMGL.spec
 tonic/specedit/testdata/wxMotif.spec
 tonic/specedit/testdata/wxX11.spec
+tonic/cache/__init__.py
+tonic/cache/imp_dict.py
+tonic/cache/imp_disk.py
+tonic/cache/imp_file.py
+tonic/cache/imp_hierachy.py
+tonic/cache/imp_memcache.py
+tonic/cache/perf.py
+tonic/cache/test.py
