@@ -83,10 +83,19 @@ class Hub(object):
 hub = Hub()
 
 
-def memoize(hub):
+def memoize(hub, hash_proc=None):
   def entangle(func):
     def memoize(func, *args, **kws):
-      return func(*args, **kws)
+      if hash_proc is None:
+        key = hash((args, tuple(kws.items())))
+      else:
+        key = hash_proc(*args, **kws)
+      try:
+        return hub.get(key)
+      except NotInCache:
+        v = func(*args, **kws)
+        hub.set(key, v)
+      return v
     return memoize
   return weak_signature_decorator(entangle)
 

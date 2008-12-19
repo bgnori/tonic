@@ -49,8 +49,11 @@ class Storage(tonic.cache.Storage):
 
 
 class MemcacheTestingServer(object):
-  def __init__(self, ip, port):
-    self.s = '/usr/bin/memcached -l %s -p %i -m 2048'%(ip, port)
+  def __init__(self, ip, port, memory=None):
+    if memory is None:
+      self.s = '/usr/bin/memcached -l %s -p %i'%(ip, port)
+    else:
+      self.s = '/usr/bin/memcached -l %s -p %i -m %i'%(ip, port, memory)
     r = re.compile(self.s)
     subprocess.call(
         [self.s+' &'],
