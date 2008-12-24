@@ -27,7 +27,9 @@ class Storage(tonic.cache.Storage):
   def _path(self, path):
     assert os.path.exists(self.workdir)
     assert os.path.exists(path)
-    return os.path.join(self.workdir, path)
+    return os.path.join(self.workdir, path[1:]) 
+    #remove /
+    #FIXME:  it works only on UNIX.
 
   def mtime(self, path):
     p = self._path(path)
@@ -47,6 +49,10 @@ class Storage(tonic.cache.Storage):
 
   def set(self, path, value, mtime=None):
     p = self._path(path)
+    try:
+      os.makedirs(os.path.dirname(p))
+    except OSError:
+      pass
     f = file(p, 'w')
     try:
       pickle.dump(value, f)

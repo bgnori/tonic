@@ -11,8 +11,32 @@ import tempfile
 
 import unittest
 
-from tonic.cache import hub, load, memoize
+from tonic.cache import hub, load, memoize, NotInCache
 from tonic.cache.imp_memcache import MemcacheTestingServer
+
+class NullTest(unittest.TestCase):
+  def setUp(self):
+    os.stat_float_times(True)
+    hub.connect('null')
+
+  def tearDown(self):
+    pass
+    
+  def test_HelloWorld(self):
+    hw = 'Hello World!'
+    hub.set('test1', hw)
+    now = time.time()
+    try:
+      mtime = hub.mtime('test1')
+      self.assert_(False)
+    except NotInCache:
+      pass
+    try:
+      value = hub.get('test1')
+      self.assert_(False)
+    except NotInCache:
+      pass
+
 
 class DictTest(unittest.TestCase):
   def setUp(self):
@@ -153,7 +177,7 @@ class MemoizeTest(unittest.TestCase):
 
   def testProc(self):
     def proc(n, *args, **kws):
-      return n
+      return str(n)
     @memoize(hub, hash_proc=proc)
     def fact(n):
       if n == 0:

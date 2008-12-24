@@ -82,19 +82,25 @@ class Hub(object):
 
 hub = Hub()
 
+import sys
+import traceback
 
 def memoize(hub, hash_proc=None):
   def entangle(func):
     def memoize(func, *args, **kws):
       if hash_proc is None:
-        key = hash((args, tuple(kws.items())))
+        key = str(hash((args, tuple(kws.items()))))
       else:
         key = hash_proc(*args, **kws)
+        assert isinstance(key, str)
       try:
         return hub.get(key)
       except NotInCache:
         v = func(*args, **kws)
         hub.set(key, v)
+      except Exception, e:
+        traceback.print_exc(file=sys.stderr)
+        v = func(*args, **kws)
       return v
     return memoize
   return weak_signature_decorator(entangle)
