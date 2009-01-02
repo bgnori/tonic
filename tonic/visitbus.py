@@ -10,6 +10,7 @@ from tonic.cache import hub, memoize
 
 @memoize(hub, lambda x: x)
 def compile(xpath):
+  assert isinstance(xpath, str)
   assert xpath.startswith('/')
 
   p = []
@@ -36,8 +37,12 @@ class Requests(object):
 
   def append(self, dest, p):
     rs = self._imp.get(dest, [])
+    assert isinstance(rs, list)
     rs.append(p)
     self._imp.update({dest: rs})
+
+  def remove(self, dest):
+    del self._imp[dest]
 
   def match(self, xpath):
     '''
@@ -85,36 +90,52 @@ class VisitBus(object):
     # Every body get in, it is starting point
 
   def dropin(self, passengers):
-    requests = dict()
+    r = Requests()
     for p in passengers:
+      assert isinstance(p, VisitPassenger)
       p.setresult(self.stack[:])
       try:
         dest = p.next()
       except StopIteration:
         continue
-      requests.append(dest, p)
-    return requests
+      r.append(dest, p)
+    return r
 
   def dispatch(self):
-    for passengers in self.requests.match(path2xpath(self.stack)):
-      requests = self.dropin(passengers)
-      self.requests = merge(self.requests, requests)
+    r = Requests()
+    for dest in list(self.requests.match(path2xpath(self.stack))):
+      passengers = self.requests[dest]
+      r = merge(r, self.dropin(passengers))
+      self.requests.remove(dest)
+    self.requests = merge(self.requests, r)
 
   def visit(self, node):
     self.stack.append(node)
     self.dispatch()
     for n in node:
-      self.visit(node)
+      self.visit(n)
     self.stack.pop()
 
 
 class VisitPassenger(object):
   def __init__(self):
     self.result = None
-    self._itinerary = self.itinerary()
+    try:
+      self._itinerary = self.itinerary()
+    except StopIteration:
+      self._itinerary = None
 
   def next(self):
-    return self._itinerary.next()
+    if self._itinerary is None:
+      raise StopIteration
+    try:
+      return compile(self._itinerary.next())
+    except StopIteration:
+      self._itinerary = None
+      raise
+
+  def setresult(self, stack):
+    self.result = stack
 
   def __iter__(self):
     return self

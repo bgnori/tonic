@@ -15,6 +15,8 @@ from tonic.cache.imp import Dict
 from tonic.visitbus import Requests
 from tonic.visitbus import merge
 from tonic.visitbus import compile
+from tonic.visitbus import VisitPassenger
+from tonic.visitbus import VisitBus
 
 hub.connect(Dict())
 
@@ -114,14 +116,88 @@ class RequestTest(unittest.TestCase):
     self.assert_('kenji' in t[self.tokyo])
 
 
-class VisitBusTest(unittest.TestCase):
+class VisitPassengerTest(unittest.TestCase):
   def setUp(self):
-
-    ET.Element('japan')
-    self.r = Requests()
-    self.tokyo = re.compile('.*tokyo$')
-    self.osaka = re.compile('^osaka')
+    pass
   def tearDown(self):
     pass
+  def testNull(self):
+    class NullPassenger(VisitPassenger):
+      def itinerary(self):
+        raise StopIteration
+    p = NullPassenger()
+    try:
+      p.next()
+      self.assert_(False)
+    except StopIteration:
+      pass
+
+  def testOnce(self):
+    class OncePassenger(VisitPassenger):
+      def itinerary(self):
+        yield '/node'
+        raise StopIteration
+
+    p = OncePassenger()
+    try:
+      path = p.next()
+    except StopIteration:
+      self.assert_(False)
+    self.assertEqual(path.pattern, '^/node')
+
+    try:
+      path = p.next()
+      self.assert_(False)
+    except StopIteration:
+      pass
+
+
+class VisitBusTest(unittest.TestCase):
+  def setUp(self):
+    world = ET.Element('world')
+    japan = ET.SubElement(world, 'japan')
+    tokyo = ET.SubElement(world, 'tokyo')
+    osaka = ET.SubElement(world, 'osaka')
+    self.tree = ET.ElementTree(world)
+  def tearDown(self):
+    pass
+
+  def test_tokyo(self):
+    class TokyoPassenger(VisitPassenger):
+      def __init__(self):
+        VisitPassenger.__init__(self)
+        self.tokyo = False
+
+      def itinerary(self):
+        yield '//tokyo'
+        self.tokyo = True
+        raise StopIteration
+    p = TokyoPassenger()
+    self.assert_(not p.tokyo)
+    bus = VisitBus((p,))
+    bus.visit(self.tree.getroot())
+    self.assert_(p.tokyo)
+
+  def test_visitTwo(self):
+    class TokyoPassenger(VisitPassenger):
+      def __init__(self):
+        VisitPassenger.__init__(self)
+        self.tokyo = False
+        self.osaka = False
+
+      def itinerary(self):
+        yield '//tokyo'
+        self.tokyo = True
+        yield '//osaka'
+        self.osaka = True
+        raise StopIteration
+
+    p = TokyoPassenger()
+    self.assert_(not p.tokyo)
+    self.assert_(not p.osaka)
+    bus = VisitBus((p,))
+    bus.visit(self.tree.getroot())
+    self.assert_(p.tokyo)
+    self.assert_(p.osaka)
 
 
