@@ -4,6 +4,7 @@
 #
 # Copyright 2008 Noriyuki Hosaka bgnori@gmail.com
 #
+__all__ = ['VisitBus', 'VisitPassenger']
 import re
 from tonic.cache import hub, memoize
 
@@ -19,11 +20,14 @@ def compile(xpath):
       assert n == ''
       p.append('^')
     elif not n:
-      p.append('((/[a-zA-Z]+)*)')
+      p.append('((/[a-zA-Z][a-zA-Z0-9]*)*)')
+    elif n == '*':
+      p.append('(/[a-zA-Z][a-zA-Z0-9]*)')
     else:
-      p.append('/'+n)
+      assert re.compile(n)
+      p.append('/('+n+')')
 
-  p = ''.join(p)
+  p = ''.join(p) + '$'
   return re.compile(p)
 
 
