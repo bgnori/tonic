@@ -4,27 +4,75 @@
 #
 # Copyright 2008 Noriyuki Hosaka bgnori@gmail.com
 #
+import re
+
+def compile(xpath):
+  assert xpath.startswith('/')
+
+  p = []
+  for i, n in enumerate(xpath.split('/')):
+    if i == 0:
+      assert n == ''
+      p.append('^')
+    elif not n:
+      p.append('((/[a-zA-Z]+)*)')
+    else:
+      p.append('/'+n)
+
+  p = ''.join(p)
+  return re.compile(p)
+
+
+def xpathize(stack):
+  return '/' + '/'.join([node.tag for node in stack])
 
 
 class Requests(object):
-  def __init__(self, *args, **kws):
-    self._imp = dict(*args, **kws)
+  def __init__(self, *args):
+    self._imp = dict(*args)
 
-  def update(self, dest, p):
-    r = self._imp.get(dest, None)
-    r.append(p)
-    self._imp.update({dest: r})
+  def append(self, dest, p):
+    rs = self._imp.get(dest, [])
+    rs.append(p)
+    self._imp.update({dest: rs})
 
-  def match(self, path):
-    for key in self._imp:
-      if key.match(path):
-        yield key, self._imp[key]
+  def match(self, xpath):
+    '''
+      remark: SRE object is hashable.
+    '''
+    for dest in self._imp:
+      match = getattr(dest, 'match', None)
+      if match and match(xpath):
+        yield dest
+      else:
+        pass
+
+  def __getitem__(self, dest):
+    return self._imp[dest]
+
+  def __contains__(self, dest):
+    return dest in self._imp
+    
+  def get(self, dest, default=None):
+    if default is not None and dest not in self._imp:
+      src = default
+    else:
+      src = self._imp[dest]
+    for r in src:
+      yield r
+
+  def pop(self, dest):
+    self._imp.pop(dest)
+
+  def keys(self):
+    return self._imp.keys()
 
 def merge(a, b):
   return Requests([
-      (dest, a.get(dest, []) + b.get(dest, []))
+      (dest, list(a.get(dest, [])) + list(b.get(dest, [])))
         for dest in set(a.keys() + b.keys())
       ])
+
 
 
 class VisitBus(object):
@@ -41,13 +89,13 @@ class VisitBus(object):
         dest = p.next()
       except StopIteration:
         continue
-      update(requests, dest, p)
+      requests.append(dest, p)
     return requests
 
   def dispatch(self):
-    for dest, passengers in self.requests.match(self.stack[:]):
+    for passengers in self.requests.match(xpathize(self.stack)):
       requests = self.dropin(passengers)
-    self.requests = merge(self.requests, requests)
+      self.requests = merge(self.requests, requests)
 
   def visit(self, node):
     self.stack.append(node)
@@ -59,7 +107,7 @@ class VisitBus(object):
 
 class VisitPassenger(object):
   def __init__(self):
-    self. = None
+    self.result = None
     self._itinerary = self.itinerary()
 
   def next(self):
