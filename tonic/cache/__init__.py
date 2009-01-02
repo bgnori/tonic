@@ -6,14 +6,12 @@
 #
 __all__ = ['hub', 'NotInCache']
 
+import sys
+import traceback
 from turbogears.decorator import weak_signature_decorator
-
-from threading import local
-serving = local()
 
 class NotInCache(Exception):
   pass
-
 class VirtualMethod(Exception):
   pass
 
@@ -31,6 +29,8 @@ class Storage(object):
 
 
 '''
+from threading import local
+serving = local()
 class _ThreadLocalProxy:
   def __init__(self, attrname):
     self.__dict__["__attrname__"] = attrname
@@ -54,12 +54,6 @@ hub = _ThreadLocalProxy('hub')
 '''
 
 
-def load(name, *args, **kws):
-    modname = 'imp_' + name
-    g = globals()
-    exec 'import ' + modname in g
-    return g[modname].Storage(*args, **kws)
-
 class Hub(object):
   '''
     ToDo: multi-threading support
@@ -76,14 +70,13 @@ class Hub(object):
     return self.storage.mtime(key)
   def set(self, value, mtime=None):
     self.storage.set(value, mtime)
-  def connect(self, name, *args, **kws):
-    self.storage = load(name, *args, **kws)
+  def connect(self, storage):
+    assert isinstance(storage, Storage)
+    self.storage = storage
 
 
 hub = Hub()
 
-import sys
-import traceback
 
 def memoize(hub, hash_proc=None):
   def entangle(func):
@@ -104,5 +97,6 @@ def memoize(hub, hash_proc=None):
       return v
     return memoize
   return weak_signature_decorator(entangle)
+
 
 

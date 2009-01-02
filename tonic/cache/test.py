@@ -11,13 +11,14 @@ import tempfile
 
 import unittest
 
-from tonic.cache import hub, load, memoize, NotInCache
+from tonic.cache import hub, memoize, NotInCache
+from tonic.cache.imp import *
 from tonic.cache.imp_memcache import MemcacheTestingServer
 
 class NullTest(unittest.TestCase):
   def setUp(self):
     os.stat_float_times(True)
-    hub.connect('null')
+    hub.connect(Null())
 
   def tearDown(self):
     pass
@@ -41,7 +42,7 @@ class NullTest(unittest.TestCase):
 class DictTest(unittest.TestCase):
   def setUp(self):
     os.stat_float_times(True)
-    hub.connect('dict')
+    hub.connect(Dict())
 
   def tearDown(self):
     pass
@@ -79,7 +80,7 @@ class MemcacheTest(unittest.TestCase):
     ip = '127.0.0.1'
     port = 22222
     self.server = MemcacheTestingServer(ip, port)
-    hub.connect('memcache', ['%s:%i'%(ip, port)])
+    hub.connect(Memcache(['%s:%i'%(ip, port)]))
     
   def tearDown(self):
     hub.purge()
@@ -99,7 +100,7 @@ class MemcacheTest(unittest.TestCase):
 class DiskTest(unittest.TestCase):
   def setUp(self):
     os.stat_float_times(True)
-    hub.connect('disk', workdir=tempfile.mkdtemp())
+    hub.connect(Disk(workdir=tempfile.mkdtemp()))
 
   def tearDown(self):
     pass
@@ -117,7 +118,7 @@ class DiskTest(unittest.TestCase):
 class FileTest(unittest.TestCase):
   def setUp(self):
     os.stat_float_times(True)
-    hub.connect('file', workdir=tempfile.mkdtemp())
+    hub.connect(File(workdir=tempfile.mkdtemp()))
 
   def tearDown(self):
     pass
@@ -135,11 +136,7 @@ class FileTest(unittest.TestCase):
 class HierachyTest(unittest.TestCase):
   def setUp(self):
     os.stat_float_times(True)
-    hub.connect(name='hierachy',
-        levels=[
-         load('dict'),
-         load('dict')
-        ])
+    hub.connect(Hierachy(levels=[Dict(),Dict()]))
 
   def tearDown(self):
     pass
@@ -157,7 +154,7 @@ class HierachyTest(unittest.TestCase):
 class MemoizeTest(unittest.TestCase):
   def setUp(self):
     os.stat_float_times(True)
-    hub.connect('dict')
+    hub.connect(Dict())
 
   def tearDown(self):
     pass
