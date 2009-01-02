@@ -33,7 +33,6 @@ class XPathTest(unittest.TestCase):
     self.assertEqual(m.pattern, r'^/root')
     self.assert_(m.match('/root'))
 
-
   def test_descendant(self):
     query = '''//node'''
     m = compile(query)
@@ -178,7 +177,7 @@ class VisitBusTest(unittest.TestCase):
     bus.visit(self.tree.getroot())
     self.assert_(p.tokyo)
 
-  def test_visitTwo(self):
+  def test_visitTwoCity(self):
     class TokyoPassenger(VisitPassenger):
       def __init__(self):
         VisitPassenger.__init__(self)
@@ -200,4 +199,33 @@ class VisitBusTest(unittest.TestCase):
     self.assert_(p.tokyo)
     self.assert_(p.osaka)
 
+  def test_ManyPassengers(self):
+    class TokyoPassenger(VisitPassenger):
+      def __init__(self):
+        VisitPassenger.__init__(self)
+        self.tokyo = False
+      def itinerary(self):
+        yield '//tokyo'
+        self.tokyo = True
+        raise StopIteration
+    class OsakaPassenger(VisitPassenger):
+      def __init__(self):
+        VisitPassenger.__init__(self)
+        self.osaka = False
+      def itinerary(self):
+        yield '//osaka'
+        self.osaka = True
+        raise StopIteration
+    tokyo1 = TokyoPassenger()
+    tokyo2 = TokyoPassenger()
+    osaka = OsakaPassenger()
+
+    self.assert_(not tokyo1.tokyo)
+    self.assert_(not tokyo2.tokyo)
+    self.assert_(not osaka.osaka)
+    bus = VisitBus((tokyo1, tokyo2, osaka))
+    bus.visit(self.tree.getroot())
+    self.assert_(tokyo1.tokyo)
+    self.assert_(tokyo2.tokyo)
+    self.assert_(osaka.osaka)
 
