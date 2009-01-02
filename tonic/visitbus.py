@@ -5,7 +5,10 @@
 # Copyright 2008 Noriyuki Hosaka bgnori@gmail.com
 #
 import re
+from tonic.cache import hub, memoize
 
+
+@memoize(hub, lambda x: x)
 def compile(xpath):
   assert xpath.startswith('/')
 
