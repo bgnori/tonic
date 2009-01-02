@@ -23,7 +23,7 @@ def compile(xpath):
   return re.compile(p)
 
 
-def xpathize(stack):
+def path2xpath(stack):
   return '/' + '/'.join([node.tag for node in stack])
 
 
@@ -93,7 +93,7 @@ class VisitBus(object):
     return requests
 
   def dispatch(self):
-    for passengers in self.requests.match(xpathize(self.stack)):
+    for passengers in self.requests.match(path2xpath(self.stack)):
       requests = self.dropin(passengers)
       self.requests = merge(self.requests, requests)
 
