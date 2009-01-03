@@ -151,16 +151,6 @@ class XPathTest(unittest.TestCase):
     self.assert_(m.match('''/C/c>'''))
     self.assert_(not m.match('''/C/c/D>'''))
 
-  def test_Regexp(self):
-    query = '''/[a-zA-Z0-9]+/A'''
-    m = compile(query)
-    self.assert_(m)
-    print m, m.pattern
-    self.assert_(not m.match('''/A>'''))
-    self.assert_(m.match('''/a/A>'''))
-    self.assert_(m.match('''/1/A>'''))
-    self.assert_(m.match('''/C/A>'''))
-    self.assert_(not m.match('''/C/c/A>'''))
 
 class RequestTest(unittest.TestCase):
   def setUp(self):
@@ -397,3 +387,24 @@ class VisitBusTest(unittest.TestCase):
     self.assert_(tokyo2.tokyo)
     self.assert_(osaka.osaka)
 
+  def test_visitRegexp(self):
+    class TokyoPassenger(VisitPassenger):
+      def __init__(self):
+        VisitPassenger.__init__(self)
+        self.tokyo = False
+        self.osaka = False
+
+      def itinerary(self):
+        yield re.compile('^.*tokyo')
+        self.tokyo = True
+        yield re.compile('^.*osaka')
+        self.osaka = True
+        raise StopIteration
+
+    p = TokyoPassenger()
+    self.assert_(not p.tokyo)
+    self.assert_(not p.osaka)
+    bus = VisitBus((p,))
+    bus.visit(self.tree.getroot())
+    self.assert_(p.tokyo)
+    self.assert_(p.osaka)

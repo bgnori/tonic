@@ -147,7 +147,12 @@ class VisitPassenger(object):
     if self._itinerary is None:
       raise StopIteration
     try:
-      return compile(self._itinerary.next())
+      t = self._itinerary.next()
+      if isinstance(t, str):
+        return compile(t)
+      else:
+        assert hasattr(t, 'match')
+        return t
     except StopIteration:
       self._itinerary = None
       raise
