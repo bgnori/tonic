@@ -30,97 +30,115 @@ class XPathTest(unittest.TestCase):
     query = '''/root'''
     m = compile(query)
     self.assert_(m)
-    self.assert_(m.match('/root'))
+    self.assert_(m.match('/root>'))
+
+  def test_absrootdown(self):
+    query = '''/root>'''
+    m = compile(query)
+    self.assert_(m)
+    self.assert_(m.match('/root>'))
+
+  def test_absrootup(self):
+    query = '''/root<'''
+    m = compile(query)
+    self.assert_(m)
+    self.assert_(m.match('/root<'))
 
   def test_descendant(self):
     query = '''//node'''
     m = compile(query)
     self.assert_(m)
     print m, m.pattern
-    self.assert_(not m.match('''/root'''))
-    self.assert_(m.match('''/root/node'''))
-    self.assert_(m.match('''/root/parent/node'''))
-    self.assert_(m.match('''/root/grandparent/parent/node'''))
+    self.assert_(not m.match('''/root>'''))
+    self.assert_(m.match('''/root/node>'''))
+    self.assert_(not m.match('''/root/node<'''))
+    self.assert_(m.match('''/root/parent/node>'''))
+    self.assert_(not m.match('''/root/parent/node<'''))
+    self.assert_(m.match('''/root/grandparent/parent/node>'''))
 
   def test_descendant_with_parent(self):
     query = '''//parent/node'''
     m = compile(query)
     self.assert_(m)
     print m, m.pattern
-    self.assert_(not m.match('''/root/node'''))
-    self.assert_(m.match('''/root/parent/node'''))
-    self.assert_(m.match('''/root/grandparent/parent/node'''))
+    self.assert_(not m.match('''/root/node>'''))
+    self.assert_(m.match('''/root/parent/node>'''))
+    self.assert_(not m.match('''/root/parent/node<'''))
+    self.assert_(m.match('''/root/grandparent/parent/node>'''))
+    self.assert_(not m.match('''/root/grandparent/parent/node<'''))
 
   def test_descendant_with_ancester(self):
     query = '''//ancester//node'''
     m = compile(query)
     self.assert_(m)
     print m, m.pattern
-    self.assert_(not m.match('''/root/node'''))
-    self.assert_(m.match('''/root/ancester/node'''))
-    self.assert_(m.match('''/root/ancester/parent/node'''))
+    self.assert_(not m.match('''/root/node>'''))
+    self.assert_(m.match('''/root/ancester/node>'''))
+    self.assert_(not m.match('''/root/ancester/node<'''))
+    self.assert_(m.match('''/root/ancester/parent/node>'''))
+    self.assert_(not m.match('''/root/ancester/parent/node<'''))
 
   def test_Or(self):
     query = '''//A|B'''
     m = compile(query)
     self.assert_(m)
     print m, m.pattern
-    self.assert_(not m.match('''/root/node'''))
-    self.assert_(m.match('''/root/A'''))
-    self.assert_(m.match('''/root/B'''))
+    self.assert_(not m.match('''/root/node>'''))
+    self.assert_(m.match('''/root/A>'''))
+    self.assert_(m.match('''/root/B>'''))
 
   def test_Or3(self):
     query = '''//A|B|C'''
     m = compile(query)
     self.assert_(m)
     print m, m.pattern
-    self.assert_(not m.match('''/root/node'''))
-    self.assert_(m.match('''/root/A'''))
-    self.assert_(m.match('''/root/B'''))
-    self.assert_(m.match('''/root/C'''))
+    self.assert_(not m.match('''/root/node>'''))
+    self.assert_(m.match('''/root/A>'''))
+    self.assert_(m.match('''/root/B>'''))
+    self.assert_(m.match('''/root/C>'''))
 
   def test_OrParent(self):
     query = '''//A|B/node'''
     m = compile(query)
     self.assert_(m)
     print m, m.pattern
-    self.assert_(not m.match('''/root/node'''))
-    self.assert_(m.match('''/root/A/node'''))
-    self.assert_(m.match('''/root/B/node'''))
+    self.assert_(not m.match('''/root/node>'''))
+    self.assert_(m.match('''/root/A/node>'''))
+    self.assert_(m.match('''/root/B/node>'''))
 
   def test_OrAncester(self):
     query = '''//A|B//node'''
     m = compile(query)
     self.assert_(m)
     print m, m.pattern
-    self.assert_(not m.match('''/root/node'''))
-    self.assert_(m.match('''/A/node'''))
-    self.assert_(m.match('''/root/A/node'''))
-    self.assert_(m.match('''/root/B/node'''))
-    self.assert_(not m.match('''/root/C/node'''))
-    self.assert_(m.match('''/A/hoge/node'''))
-    self.assert_(m.match('''/root/A/hoge/node'''))
-    self.assert_(m.match('''/root/B/hoge/node'''))
-    self.assert_(m.match('''/root/B/hoge/bar/node'''))
-    self.assert_(not m.match('''/root/C/hoge/node'''))
+    self.assert_(not m.match('''/root/node>'''))
+    self.assert_(m.match('''/A/node>'''))
+    self.assert_(m.match('''/root/A/node>'''))
+    self.assert_(m.match('''/root/B/node>'''))
+    self.assert_(not m.match('''/root/C/node>'''))
+    self.assert_(m.match('''/A/hoge/node>'''))
+    self.assert_(m.match('''/root/A/hoge/node>'''))
+    self.assert_(m.match('''/root/B/hoge/node>'''))
+    self.assert_(m.match('''/root/B/hoge/bar/node>'''))
+    self.assert_(not m.match('''/root/C/hoge/node>'''))
 
   def test_Any(self):
     query = '''/*'''
     m = compile(query)
     self.assert_(m)
     print m, m.pattern
-    self.assert_(m.match('''/A'''))
-    self.assert_(m.match('''/B'''))
-    self.assert_(m.match('''/C'''))
+    self.assert_(m.match('''/A>'''))
+    self.assert_(m.match('''/B>'''))
+    self.assert_(m.match('''/C>'''))
 
   def test_AnyInParent(self):
     query = '''/*/node'''
     m = compile(query)
     self.assert_(m)
     print m, m.pattern
-    self.assert_(m.match('''/A/node'''))
-    self.assert_(m.match('''/B/node'''))
-    self.assert_(m.match('''/C/node'''))
+    self.assert_(m.match('''/A/node>'''))
+    self.assert_(m.match('''/B/node>'''))
+    self.assert_(m.match('''/C/node>'''))
 
   def test_TwoAnys(self):
     query = '''/*/*'''
@@ -128,21 +146,21 @@ class XPathTest(unittest.TestCase):
     self.assert_(m)
     print m, m.pattern
     self.assert_(not m.match('''/A'''))
-    self.assert_(m.match('''/A/a'''))
-    self.assert_(m.match('''/B/b'''))
-    self.assert_(m.match('''/C/c'''))
-    self.assert_(not m.match('''/C/c/D'''))
+    self.assert_(m.match('''/A/a>'''))
+    self.assert_(m.match('''/B/b>'''))
+    self.assert_(m.match('''/C/c>'''))
+    self.assert_(not m.match('''/C/c/D>'''))
 
   def test_Regexp(self):
     query = '''/[a-zA-Z0-9]+/A'''
     m = compile(query)
     self.assert_(m)
     print m, m.pattern
-    self.assert_(not m.match('''/A'''))
-    self.assert_(m.match('''/a/A'''))
-    self.assert_(m.match('''/1/A'''))
-    self.assert_(m.match('''/C/A'''))
-    self.assert_(not m.match('''/C/c/A'''))
+    self.assert_(not m.match('''/A>'''))
+    self.assert_(m.match('''/a/A>'''))
+    self.assert_(m.match('''/1/A>'''))
+    self.assert_(m.match('''/C/A>'''))
+    self.assert_(not m.match('''/C/c/A>'''))
 
 class RequestTest(unittest.TestCase):
   def setUp(self):
@@ -224,7 +242,7 @@ class VisitPassengerTest(unittest.TestCase):
       path = p.next()
     except StopIteration:
       self.assert_(False)
-    self.assertEqual(path.pattern, '^/(node)$')
+    self.assertEqual(path.pattern, '^/(node)>$')
 
     try:
       path = p.next()

@@ -13,6 +13,15 @@ from tonic.cache import hub, memoize
 def compile(xpath):
   assert isinstance(xpath, str)
   assert xpath.startswith('/')
+  if xpath.endswith('<'):
+    direction = '<'
+    xpath = xpath[:-1]
+  elif xpath.endswith('>'):
+    direction = '>'
+    xpath = xpath[:-1]
+  else:
+    '''defulat'''
+    direction = '>'
 
   p = []
   for i, n in enumerate(xpath.split('/')):
@@ -27,13 +36,17 @@ def compile(xpath):
       assert re.compile(n)
       p.append('/('+n+')')
 
-  p = ''.join(p) + '$'
+  p = ''.join(p) + direction + '$'
   return re.compile(p)
 
 
-def path2xpath(stack):
-  return '/' + '/'.join([node.tag for node in stack])
-
+def path2xpath(stack, direction):
+  if direction == 'down':
+    return '/' + '/'.join([node.tag for node in stack]) + '>'
+  elif direction == 'up':
+    return '/' + '/'.join([node.tag for node in stack]) + '<'
+  else:
+    assert False
 
 class Requests(object):
   def __init__(self, *args):
@@ -105,9 +118,9 @@ class VisitBus(object):
       r.append(dest, p)
     return r
 
-  def dispatch(self):
+  def dispatch(self, direction):
     r = Requests()
-    for dest in list(self.requests.match(path2xpath(self.stack))):
+    for dest in list(self.requests.match(path2xpath(self.stack, direction))):
       passengers = self.requests[dest]
       r = merge(r, self.dropin(passengers))
       self.requests.remove(dest)
@@ -115,9 +128,10 @@ class VisitBus(object):
 
   def visit(self, node):
     self.stack.append(node)
-    self.dispatch()
+    self.dispatch('down')
     for n in node:
       self.visit(n)
+    self.dispatch('up')
     self.stack.pop()
 
 
