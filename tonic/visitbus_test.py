@@ -277,6 +277,22 @@ class VisitBusTest(unittest.TestCase):
     bus.visit(self.tree.getroot())
     self.assert_(p.tokyo)
 
+  def test_tokyoup(self):
+    class TokyoPassenger(VisitPassenger):
+      def __init__(self):
+        VisitPassenger.__init__(self)
+        self.tokyo = False
+
+      def itinerary(self):
+        yield '//tokyo<'
+        self.tokyo = True
+        raise StopIteration
+    p = TokyoPassenger()
+    self.assert_(not p.tokyo)
+    bus = VisitBus((p,))
+    bus.visit(self.tree.getroot())
+    self.assert_(p.tokyo)
+
   def test_visitTwoCity(self):
     class TokyoPassenger(VisitPassenger):
       def __init__(self):

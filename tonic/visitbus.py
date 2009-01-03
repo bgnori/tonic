@@ -155,6 +155,9 @@ class VisitPassenger(object):
   def setresult(self, stack):
     self.result = stack
 
+  def getresult(self):
+    return self.result
+
   def __iter__(self):
     return self
 
