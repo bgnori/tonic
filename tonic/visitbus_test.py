@@ -255,8 +255,8 @@ class VisitBusTest(unittest.TestCase):
   def setUp(self):
     world = ET.Element('world')
     japan = ET.SubElement(world, 'japan')
-    tokyo = ET.SubElement(world, 'tokyo')
-    osaka = ET.SubElement(world, 'osaka')
+    tokyo = ET.SubElement(japan, 'tokyo')
+    osaka = ET.SubElement(japan, 'osaka')
     self.tree = ET.ElementTree(world)
   def tearDown(self):
     pass
@@ -292,6 +292,58 @@ class VisitBusTest(unittest.TestCase):
     bus = VisitBus((p,))
     bus.visit(self.tree.getroot())
     self.assert_(p.tokyo)
+
+  def test_tokyodu(self):
+    class TokyoPassenger(VisitPassenger):
+      def __init__(self):
+        VisitPassenger.__init__(self)
+        self.down = False
+        self.up= False
+
+      def itinerary(self):
+        yield '//tokyo>'
+        self.down = True
+        yield '//tokyo<'
+        self.up= True
+        raise StopIteration
+    p = TokyoPassenger()
+    self.assert_(not p.down)
+    self.assert_(not p.up)
+    bus = VisitBus((p,))
+    bus.visit(self.tree.getroot())
+    self.assert_(p.down)
+    self.assert_(p.up)
+
+  def test_japandu(self):
+    class JapanPassenger(VisitPassenger):
+      def __init__(self):
+        VisitPassenger.__init__(self)
+        self.down = False
+        self.up= False
+        self.tokyo = False
+        self.osaka = False
+
+      def itinerary(self):
+        yield '//japan>'
+        self.down = True
+        yield '//tokyo'
+        self.tokyo = True
+        yield '//osaka'
+        self.osaka = True
+        yield '//japan<'
+        self.up = True
+        raise StopIteration
+    p = JapanPassenger()
+    self.assert_(not p.down)
+    self.assert_(not p.up)
+    self.assert_(not p.tokyo)
+    self.assert_(not p.osaka)
+    bus = VisitBus((p,))
+    bus.visit(self.tree.getroot())
+    self.assert_(p.down)
+    self.assert_(p.tokyo)
+    self.assert_(p.osaka)
+    self.assert_(p.up)
 
   def test_visitTwoCity(self):
     class TokyoPassenger(VisitPassenger):
