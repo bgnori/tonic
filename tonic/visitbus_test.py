@@ -14,7 +14,7 @@ from tonic.cache import hub
 from tonic.cache.imp import Dict 
 from tonic.visitbus import Requests
 from tonic.visitbus import merge
-from tonic.visitbus import compile
+from tonic.visitbus import vpath2regexp
 from tonic.visitbus import VisitPassenger
 from tonic.visitbus import VisitBus
 
@@ -28,25 +28,25 @@ class XPathTest(unittest.TestCase):
 
   def test_absroot(self):
     query = '''/root'''
-    m = compile(query)
+    m = vpath2regexp(query)
     self.assert_(m)
     self.assert_(m.match('/root>'))
 
   def test_absrootdown(self):
     query = '''/root>'''
-    m = compile(query)
+    m = vpath2regexp(query)
     self.assert_(m)
     self.assert_(m.match('/root>'))
 
   def test_absrootup(self):
     query = '''/root<'''
-    m = compile(query)
+    m = vpath2regexp(query)
     self.assert_(m)
     self.assert_(m.match('/root<'))
 
   def test_descendant(self):
     query = '''//node'''
-    m = compile(query)
+    m = vpath2regexp(query)
     self.assert_(m)
     print m, m.pattern
     self.assert_(not m.match('''/root>'''))
@@ -58,7 +58,7 @@ class XPathTest(unittest.TestCase):
 
   def test_descendant_with_parent(self):
     query = '''//parent/node'''
-    m = compile(query)
+    m = vpath2regexp(query)
     self.assert_(m)
     print m, m.pattern
     self.assert_(not m.match('''/root/node>'''))
@@ -69,7 +69,7 @@ class XPathTest(unittest.TestCase):
 
   def test_descendant_with_ancester(self):
     query = '''//ancester//node'''
-    m = compile(query)
+    m = vpath2regexp(query)
     self.assert_(m)
     print m, m.pattern
     self.assert_(not m.match('''/root/node>'''))
@@ -80,7 +80,7 @@ class XPathTest(unittest.TestCase):
 
   def test_Or(self):
     query = '''//A|B'''
-    m = compile(query)
+    m = vpath2regexp(query)
     self.assert_(m)
     print m, m.pattern
     self.assert_(not m.match('''/root/node>'''))
@@ -89,7 +89,7 @@ class XPathTest(unittest.TestCase):
 
   def test_Or3(self):
     query = '''//A|B|C'''
-    m = compile(query)
+    m = vpath2regexp(query)
     self.assert_(m)
     print m, m.pattern
     self.assert_(not m.match('''/root/node>'''))
@@ -99,7 +99,7 @@ class XPathTest(unittest.TestCase):
 
   def test_OrParent(self):
     query = '''//A|B/node'''
-    m = compile(query)
+    m = vpath2regexp(query)
     self.assert_(m)
     print m, m.pattern
     self.assert_(not m.match('''/root/node>'''))
@@ -108,7 +108,7 @@ class XPathTest(unittest.TestCase):
 
   def test_OrAncester(self):
     query = '''//A|B//node'''
-    m = compile(query)
+    m = vpath2regexp(query)
     self.assert_(m)
     print m, m.pattern
     self.assert_(not m.match('''/root/node>'''))
@@ -124,7 +124,7 @@ class XPathTest(unittest.TestCase):
 
   def test_Any(self):
     query = '''/*'''
-    m = compile(query)
+    m = vpath2regexp(query)
     self.assert_(m)
     print m, m.pattern
     self.assert_(m.match('''/A>'''))
@@ -133,7 +133,7 @@ class XPathTest(unittest.TestCase):
 
   def test_AnyInParent(self):
     query = '''/*/node'''
-    m = compile(query)
+    m = vpath2regexp(query)
     self.assert_(m)
     print m, m.pattern
     self.assert_(m.match('''/A/node>'''))
@@ -142,7 +142,7 @@ class XPathTest(unittest.TestCase):
 
   def test_TwoAnys(self):
     query = '''/*/*'''
-    m = compile(query)
+    m = vpath2regexp(query)
     self.assert_(m)
     print m, m.pattern
     self.assert_(not m.match('''/A'''))
@@ -167,12 +167,12 @@ class RequestTest(unittest.TestCase):
     self.assert_(self.tokyo.match('osakatokyo'))
 
   def test_append(self):
-    self.r.append(self.tokyo, 'mochy')
+    self.r._append(self.tokyo, 'mochy')
     self.assert_(self.tokyo in self.r)
     self.assert_(self.osaka not in self.r)
-    self.r.append(self.tokyo, 'kenji')
+    self.r._append(self.tokyo, 'kenji')
     self.assert_(self.tokyo in self.r)
-    self.r.append(self.osaka, 'michy')
+    self.r._append(self.osaka, 'michy')
     self.assert_(self.osaka in self.r)
     self.assert_('mochy' in self.r[self.tokyo])
     self.assert_('mochy' not in self.r[self.osaka])
@@ -183,22 +183,25 @@ class RequestTest(unittest.TestCase):
 
 
   def test_match(self):
-    self.r.append(self.tokyo, 'mochy')
-    self.r.append(self.tokyo, 'kenji')
-    self.r.append(self.osaka, 'michy')
-    self.assertEqual(list(self.r.match('tokyo')), 
-                        [self.tokyo])
-    self.assertEqual(list(self.r.match('osaka')),
-                        [self.osaka])
-    self.assert_(self.tokyo in self.r.match('osakatokyo'))
-    self.assert_(self.osaka in self.r.match('osakatokyo'))
+    self.r._append(self.tokyo, 'mochy')
+    self.r._append(self.tokyo, 'kenji')
+    self.r._append(self.osaka, 'michy')
+    print zip(self.r.match('tokyo'))[0]
+    self.assert_(self.tokyo
+                    in zip(self.r.match('tokyo'))[0][0])
+    self.assert_(self.osaka
+                    in zip(self.r.match('osaka'))[0][0])
+    self.assert_(self.tokyo 
+                    in zip(self.r.match('osakatokyo'))[0][0])
+    self.assert_(self.osaka 
+                    in zip(self.r.match('osakatokyo'))[1][0])
 
   def test_merge(self):
     r = Requests()
     s = Requests()
     tokyo = re.compile('tokyo')
-    r.append(self.tokyo, 'kenji')
-    s.append(self.tokyo, 'mochy')
+    r._append(self.tokyo, 'kenji')
+    s._append(self.tokyo, 'mochy')
 
     t = merge(s, r)
     self.assert_('mochy' in t[self.tokyo])
@@ -224,7 +227,7 @@ class VisitPassengerTest(unittest.TestCase):
   def testOnce(self):
     class OncePassenger(VisitPassenger):
       def itinerary(self):
-        yield '/node'
+        yield vpath2regexp('/node')
         raise StopIteration
 
     p = OncePassenger()
@@ -258,7 +261,7 @@ class VisitBusTest(unittest.TestCase):
         self.tokyo = False
 
       def itinerary(self):
-        yield '//tokyo'
+        yield vpath2regexp('//tokyo')
         self.tokyo = True
         raise StopIteration
     p = TokyoPassenger()
@@ -274,7 +277,7 @@ class VisitBusTest(unittest.TestCase):
         self.tokyo = False
 
       def itinerary(self):
-        yield '//tokyo<'
+        yield vpath2regexp('//tokyo<')
         self.tokyo = True
         raise StopIteration
     p = TokyoPassenger()
@@ -291,9 +294,9 @@ class VisitBusTest(unittest.TestCase):
         self.up= False
 
       def itinerary(self):
-        yield '//tokyo>'
+        yield vpath2regexp('//tokyo>')
         self.down = True
-        yield '//tokyo<'
+        yield vpath2regexp('//tokyo<')
         self.up= True
         raise StopIteration
     p = TokyoPassenger()
@@ -314,13 +317,13 @@ class VisitBusTest(unittest.TestCase):
         self.osaka = False
 
       def itinerary(self):
-        yield '//japan>'
+        yield vpath2regexp('//japan>')
         self.down = True
-        yield '//tokyo'
+        yield vpath2regexp('//tokyo')
         self.tokyo = True
-        yield '//osaka'
+        yield vpath2regexp('//osaka')
         self.osaka = True
-        yield '//japan<'
+        yield vpath2regexp('//japan<')
         self.up = True
         raise StopIteration
     p = JapanPassenger()
@@ -343,9 +346,9 @@ class VisitBusTest(unittest.TestCase):
         self.osaka = False
 
       def itinerary(self):
-        yield '//tokyo'
+        yield vpath2regexp('//tokyo')
         self.tokyo = True
-        yield '//osaka'
+        yield vpath2regexp('//osaka')
         self.osaka = True
         raise StopIteration
 
@@ -363,7 +366,7 @@ class VisitBusTest(unittest.TestCase):
         VisitPassenger.__init__(self)
         self.tokyo = False
       def itinerary(self):
-        yield '//tokyo'
+        yield vpath2regexp('//tokyo')
         self.tokyo = True
         raise StopIteration
     class OsakaPassenger(VisitPassenger):
@@ -371,7 +374,7 @@ class VisitBusTest(unittest.TestCase):
         VisitPassenger.__init__(self)
         self.osaka = False
       def itinerary(self):
-        yield '//osaka'
+        yield vpath2regexp('//osaka')
         self.osaka = True
         raise StopIteration
     tokyo1 = TokyoPassenger()
@@ -408,3 +411,37 @@ class VisitBusTest(unittest.TestCase):
     bus.visit(self.tree.getroot())
     self.assert_(p.tokyo)
     self.assert_(p.osaka)
+
+  def test_spawn(self):
+    class Child(VisitPassenger):
+      def __init__(self):
+        VisitPassenger.__init__(self)
+        self.osaka= False
+
+      def itinerary(self):
+        yield vpath2regexp('//osaka')
+        self.osaka= True
+        raise StopIteration
+
+    c = Child()
+    class Parent(VisitPassenger):
+      def __init__(self):
+        VisitPassenger.__init__(self)
+        self.tokyo = False
+      def spawn(self):
+        return [c]
+      def itinerary(self):
+        yield re.compile('^.*tokyo')
+        self.tokyo = True
+        raise StopIteration
+
+    p = Parent()
+    self.assert_(not p.tokyo)
+    self.assert_(not c.osaka)
+    bus = VisitBus((p,))
+    bus.visit(self.tree.getroot())
+    self.assert_(p.tokyo)
+    self.assert_(c.osaka)
+
+
+

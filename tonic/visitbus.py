@@ -10,21 +10,21 @@ from tonic.cache import hub, memoize
 
 
 @memoize(hub, lambda x: x)
-def compile(xpath):
-  assert isinstance(xpath, str)
-  assert xpath.startswith('/')
-  if xpath.endswith('<'):
+def vpath2regexp(vpath):
+  assert isinstance(vpath, str)
+  assert vpath.startswith('/')
+  if vpath.endswith('<'):
     direction = '<'
-    xpath = xpath[:-1]
-  elif xpath.endswith('>'):
+    vpath = vpath[:-1]
+  elif vpath.endswith('>'):
     direction = '>'
-    xpath = xpath[:-1]
+    vpath = vpath[:-1]
   else:
     '''defulat'''
     direction = '>'
 
   p = []
-  for i, n in enumerate(xpath.split('/')):
+  for i, n in enumerate(vpath.split('/')):
     if i == 0:
       assert n == ''
       p.append('^')
@@ -40,7 +40,7 @@ def compile(xpath):
   return re.compile(p)
 
 
-def path2xpath(stack, direction):
+def path2vpath(stack, direction):
   if direction == 'down':
     return '/' + '/'.join([node.tag for node in stack]) + '>'
   elif direction == 'up':
@@ -52,23 +52,34 @@ class Requests(object):
   def __init__(self, *args):
     self._imp = dict(*args)
 
-  def append(self, dest, p):
+  def _append(self, dest, p):
     rs = self._imp.get(dest, [])
     assert isinstance(rs, list)
     rs.append(p)
     self._imp.update({dest: rs})
 
+  def next(self, p, stack, matchobj):
+    assert isinstance(p, VisitPassenger)
+    p.setresult(stack, matchobj)
+    try:
+      dest = p.next()
+      self._append(dest, p)
+    except StopIteration:
+      pass 
+
   def remove(self, dest):
     del self._imp[dest]
 
-  def match(self, xpath):
+  def match(self, vpath):
     '''
       remark: SRE object is hashable.
     '''
     for dest in self._imp:
       match = getattr(dest, 'match', None)
-      if match and match(xpath):
-        yield dest
+      if match:
+        mo = match(vpath)
+        if mo:
+          yield dest, mo
       else:
         pass
 
@@ -103,28 +114,36 @@ def merge(a, b):
 class VisitBus(object):
   def __init__(self, passengers):
     self.stack = []
-    self.requests = self.dropin(passengers)
+    self.requests = Requests()
+    for p in passengers:
+      self.requests.next(p, self.stack[:], None)
     # Every body get in, it is starting point
 
-  def dropin(self, passengers):
+  def unload(self, getoff):
+    for dest, matchobj in getoff:
+      self.requests.remove(dest)
+
+  def wicket(self, xs):
     r = Requests()
-    for p in passengers:
-      assert isinstance(p, VisitPassenger)
-      p.setresult(self.stack[:])
-      try:
-        dest = p.next()
-      except StopIteration:
-        continue
-      r.append(dest, p)
+    for dest, matchobj in xs:
+      for p in self.requests[dest]:
+        assert isinstance(p, VisitPassenger)
+        r.next(p, self.stack[:], matchobj)
+        for c in p.spawn():
+          r.next(c, self.stack[:], matchobj)
     return r
 
+  def load(self, requests):
+    self.requests = merge(self.requests, requests)
+
+  def match(self, vpath):
+    return self.requests.match(vpath)
+
   def dispatch(self, direction):
-    r = Requests()
-    for dest in list(self.requests.match(path2xpath(self.stack, direction))):
-      passengers = self.requests[dest]
-      r = merge(r, self.dropin(passengers))
-      self.requests.remove(dest)
-    self.requests = merge(self.requests, r)
+    wokeup = list(self.match(path2vpath(self.stack, direction)))
+    r = self.wicket(wokeup)
+    self.unload(wokeup)
+    self.load(r)
 
   def visit(self, node):
     self.stack.append(node)
@@ -138,6 +157,7 @@ class VisitBus(object):
 class VisitPassenger(object):
   def __init__(self):
     self.result = None
+    self.match = None
     try:
       self._itinerary = self.itinerary()
     except StopIteration:
@@ -148,17 +168,19 @@ class VisitPassenger(object):
       raise StopIteration
     try:
       t = self._itinerary.next()
-      if isinstance(t, str):
-        return compile(t)
-      else:
-        assert hasattr(t, 'match')
-        return t
+      #vpath2regexp(t)
+      assert hasattr(t, 'match')
+      return t
     except StopIteration:
       self._itinerary = None
       raise
 
-  def setresult(self, stack):
+  def setresult(self, stack, matchobj):
     self.result = stack
+    self.match = matchobj
+
+  def spawn(self):
+    return []
 
   def getresult(self):
     return self.result
