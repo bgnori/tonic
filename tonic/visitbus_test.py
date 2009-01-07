@@ -20,7 +20,7 @@ from tonic.visitbus import VisitBus
 
 hub.connect(Dict())
 
-class XPathTest(unittest.TestCase):
+class VPathTest(unittest.TestCase):
   def setUp(self):
     pass
   def tearDown(self):
@@ -269,6 +269,7 @@ class VisitBusTest(unittest.TestCase):
     bus = VisitBus((p,))
     bus.visit(self.tree.getroot())
     self.assert_(p.tokyo)
+    self.assertEqual(p.visitbus, bus)
 
   def test_tokyoup(self):
     class TokyoPassenger(VisitPassenger):

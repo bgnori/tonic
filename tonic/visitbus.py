@@ -58,9 +58,9 @@ class Requests(object):
     rs.append(p)
     self._imp.update({dest: rs})
 
-  def next(self, p, stack, matchobj):
+  def next(self, p, stack, matchobj, visitbus):
     assert isinstance(p, VisitPassenger)
-    p.setresult(stack, matchobj)
+    p.setresult(stack, matchobj, visitbus)
     try:
       dest = p.next()
       self._append(dest, p)
@@ -110,13 +110,12 @@ def merge(a, b):
       ])
 
 
-
 class VisitBus(object):
   def __init__(self, passengers):
     self.stack = []
     self.requests = Requests()
     for p in passengers:
-      self.requests.next(p, self.stack[:], None)
+      self.requests.next(p, self.stack[:], None, self)
     # Every body get in, it is starting point
 
   def unload(self, getoff):
@@ -128,9 +127,9 @@ class VisitBus(object):
     for dest, matchobj in xs:
       for p in self.requests[dest]:
         assert isinstance(p, VisitPassenger)
-        r.next(p, self.stack[:], matchobj)
+        r.next(p, self.stack[:], matchobj, self)
         for c in p.spawn():
-          r.next(c, self.stack[:], matchobj)
+          r.next(c, self.stack[:], matchobj, self)
     return r
 
   def load(self, requests):
@@ -158,6 +157,7 @@ class VisitPassenger(object):
   def __init__(self):
     self.result = None
     self.match = None
+    self.visitbus = None
     try:
       self._itinerary = self.itinerary()
     except StopIteration:
@@ -175,9 +175,10 @@ class VisitPassenger(object):
       self._itinerary = None
       raise
 
-  def setresult(self, stack, matchobj):
+  def setresult(self, stack, matchobj, visitbus):
     self.result = stack
     self.match = matchobj
+    self.visitbus = visitbus
 
   def spawn(self):
     return []
