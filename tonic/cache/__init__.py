@@ -111,18 +111,22 @@ class Hub(object):
 
 hub = Hub()
 
-
-def memoize(hub, hash_proc=None):
+def memoize(hub, preheat_range=None, hash_proc=None):
   def entangle(func):
+    entangle.__dict__['first'] = True #ugh!
     def memoize(func, *args, **kws):
       if hash_proc is None:
-        key = str(hash((args, tuple(kws.items()))))
+        key = (args, tuple(kws.items()))
       else:
         key = hash_proc(*args, **kws)
-        assert isinstance(key, str)
       try:
         return hub.get(key)
       except NotInCache:
+        if entangle.first:
+          entangle.first = False
+          if preheat_range is not None:
+            for a, k in preheat_range:
+              func(*a, **k)
         v = func(*args, **kws)
         hub.set(key, v)
       except Exception, e:
@@ -131,6 +135,5 @@ def memoize(hub, hash_proc=None):
       return v
     return memoize
   return weak_signature_decorator(entangle)
-
 
 

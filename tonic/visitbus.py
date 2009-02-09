@@ -9,7 +9,7 @@ import re
 from tonic.cache import hub, memoize
 
 
-@memoize(hub, lambda x: x)
+@memoize(hub)
 def vpath2regexp(vpath):
   assert isinstance(vpath, str)
   assert vpath.startswith('/')

@@ -159,7 +159,7 @@ class MemoizeTest(unittest.TestCase):
   def tearDown(self):
     pass
 
-  def testNoneProc(self):
+  def testOne(self):
     @memoize(hub)
     def fact(n):
       if n == 0:
@@ -172,7 +172,18 @@ class MemoizeTest(unittest.TestCase):
     cached = fact(10)
     self.assertEqual(nocache, cached)
 
-  def testProc(self):
+  def testPreheat(self):
+    @memoize(hub, preheat_range=[((i,), {}) for i in range(1000)])
+    def fact(n):
+      if n == 0:
+        return 1
+      elif n == 1:
+        return 1
+      else:
+        return fact(n-1)*n
+    fact(1024)
+
+  def testHashProc(self):
     def proc(n, *args, **kws):
       return str(n)
     @memoize(hub, hash_proc=proc)
