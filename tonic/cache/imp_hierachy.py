@@ -34,7 +34,7 @@ class Storage(tonic.cache.HashableKeyStorage):
         pass
     raise NotInCache
     
-  def _get(self, key, default):
+  def _get(self, key):
     '''
       FIXME:
         Implement entry bring up from Level n to Level m where m < n.

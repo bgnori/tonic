@@ -38,7 +38,7 @@ class Storage(tonic.cache.StringKeyStorage):
     if mtime is not None:
       os.utime(mtime, mtime)
   
-  def _get(self, key, default):
+  def _get(self, key):
     p = self._path(key)
     if not os.path.exists(p):
       raise NotInCache

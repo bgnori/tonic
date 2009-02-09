@@ -17,7 +17,7 @@ import re
 import tonic.cache 
 from tonic.cache import NotInCache
 
-class Storage(tonic.cache.Storage):
+class Storage(tonic.cache.StringKeyStorage):
   def __init__(self, *args, **kws):
     self.client = memcache.Client(*args, **kws)
 
@@ -30,12 +30,12 @@ class Storage(tonic.cache.Storage):
   def close(self):
     pass
 
-  def set(self, key, value, mtime=None):
+  def _set(self, key, value, mtime):
     if mtime is None:
       mtime = time.time()
     self.client.set(self.hash(key), (value, mtime))
 
-  def get(self, key):
+  def _get(self, key):
     v = self.client.get(self.hash(key))
     if v:
       return v[0]

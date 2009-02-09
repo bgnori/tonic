@@ -34,9 +34,14 @@ class Storage(object):
 
   def get(self, key, default=None):
     self.checkkeytype(key)
-    return self._get(key, default)
+    try:
+      return self._get(key)
+    except NotInCache:
+      if default is not None:
+        return default
+      raise NotInCache
 
-  def _get(self, key, default):
+  def _get(self, key):
     raise VirtualMethod
 
   def mtime(self, key):

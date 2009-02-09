@@ -18,13 +18,10 @@ class Storage(tonic.cache.HashableKeyStorage):
   def close(self):
     pass
   
-  def _get(self, key, default):
+  def _get(self, key):
     v = self.d.get(key)
     if v is None:
-      if default is None:
-        raise NotInCache
-      else:
-        return default
+      raise NotInCache
     return v[0]
   
   def _mtime(self, key):

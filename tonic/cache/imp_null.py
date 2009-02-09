@@ -18,7 +18,7 @@ class Storage(tonic.cache.HashableKeyStorage):
   def close(self):
     pass
 
-  def _get(self, key, default):
+  def _get(self, key):
     raise NotInCache
 
   def _mtime(self, key):

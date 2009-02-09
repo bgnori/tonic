@@ -187,7 +187,3 @@ class MemoizeTest(unittest.TestCase):
     cached = fact(10)
     self.assertEqual(nocache, cached)
 
-
-
-
-

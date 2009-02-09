@@ -37,13 +37,10 @@ class Storage(tonic.cache.Storage):
       raise NotInCache
     return os.path.getmtime(p)
 
-  def _get(self, key, default):
+  def _get(self, key):
     p = self._path(key)
     if not os.path.exists(p):
-      if default is None:
-        raise NotInCache
-      else:
-        return default
+      raise NotInCache
     f = file(p, 'r')
     try:
       return pickle.load(f)
