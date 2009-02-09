@@ -12,7 +12,7 @@ import tonic.cache
 from tonic.cache import NotInCache
 
 
-class Storage(tonic.cache.Storage):
+class Storage(tonic.cache.StringKeyStorage):
   def __init__(self, workdir, *args, **kws):
     assert os.path.isabs(workdir)
     assert os.path.exists(workdir)
@@ -29,16 +29,16 @@ class Storage(tonic.cache.Storage):
     assert os.path.isabs(self.workdir)
     return os.path.join(self.workdir, str(hash(key)))
 
-  def set(self, key, value, mtime=None):
+  def _set(self, key, value, mtime):
     f = file(self._path(key), 'w')
     try:
       pickle.dump(value, f)
     finally:
       f.close()
-    if mtime:
+    if mtime is not None:
       os.utime(mtime, mtime)
   
-  def get(self, key):
+  def _get(self, key, default):
     p = self._path(key)
     if not os.path.exists(p):
       raise NotInCache
@@ -48,7 +48,7 @@ class Storage(tonic.cache.Storage):
     finally:
       f.close()
 
-  def mtime(self, key):
+  def _mtime(self, key):
     assert os.path.exists(self.workdir)
     p = self._path(key)
     if not os.path.exists(p):

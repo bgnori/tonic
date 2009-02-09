@@ -8,7 +8,7 @@ import time
 import tonic.cache 
 from tonic.cache import NotInCache
 
-class Storage(tonic.cache.Storage):
+class Storage(tonic.cache.HashableKeyStorage):
   def __init__(self, *args, **kws):
     self.d = dict(**kws)
 
@@ -18,20 +18,23 @@ class Storage(tonic.cache.Storage):
   def close(self):
     pass
   
-  def get(self, path):
-    v = self.d.get(path)
+  def _get(self, key, default):
+    v = self.d.get(key)
     if v is None:
-      raise NotInCache
+      if default is None:
+        raise NotInCache
+      else:
+        return default
     return v[0]
   
-  def mtime(self, path):
-    v = self.d.get(path)
+  def _mtime(self, key):
+    v = self.d.get(key)
     if v is None:
       raise NotInCache
-    return self.d.get(path)[1]
+    return self.d.get(key)[1]
 
-  def set(self, path, value, mtime=None):
+  def _set(self, key, value, mtime):
     if mtime is None:
       mtime = time.time()
-    self.d[path] = value, mtime
+    self.d[key] = value, mtime
 

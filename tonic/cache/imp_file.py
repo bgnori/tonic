@@ -24,31 +24,34 @@ class Storage(tonic.cache.Storage):
   def close(self):
     pass
 
-  def _path(self, path):
+  def _path(self, key):
     assert os.path.exists(self.workdir)
-    assert os.path.exists(path)
-    return os.path.join(self.workdir, path[1:]) 
+    assert os.path.exists(key)
+    return os.path.join(self.workdir, key[1:]) 
     #remove /
     #FIXME:  it works only on UNIX.
 
-  def mtime(self, path):
-    p = self._path(path)
+  def _mtime(self, key):
+    p = self._path(key)
     if not os.path.exists(p):
       raise NotInCache
     return os.path.getmtime(p)
 
-  def get(self, path):
-    p = self._path(path)
+  def _get(self, key, default):
+    p = self._path(key)
     if not os.path.exists(p):
-      raise NotInCache
+      if default is None:
+        raise NotInCache
+      else:
+        return default
     f = file(p, 'r')
     try:
       return pickle.load(f)
     finally:
       f.close()
 
-  def set(self, path, value, mtime=None):
-    p = self._path(path)
+  def _set(self, key, value, mtime):
+    p = self._path(key)
     try:
       os.makedirs(os.path.dirname(p))
     except OSError:

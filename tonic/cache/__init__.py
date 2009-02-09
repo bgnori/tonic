@@ -18,14 +18,43 @@ class VirtualMethod(Exception):
 class Storage(object):
   def purge(self):
     raise VirtualMethod
+
   def close(self):
     raise VirtualMethod
+
+  def checkkeytype(self, key):
+    pass
+
   def set(self, key, value, mtime=None):
+    self.checkkeytype(key)
+    self._set(key, value, mtime)
+
+  def _set(self, value, mtime):
     raise VirtualMethod
+
   def get(self, key, default=None):
+    self.checkkeytype(key)
+    return self._get(key, default)
+
+  def _get(self, key, default):
     raise VirtualMethod
+
   def mtime(self, key):
+    self.checkkeytype(key)
+    return self._mtime(key)
+
+  def _mtime(self, key):
     raise VirtualMethod
+
+
+class HashableKeyStorage(Storage):
+  def checkkeytype(self, key):
+    assert hash(key) is not None
+
+
+class StringKeyStorage(Storage):
+  def checkkeytype(self, key):
+    assert isinstance(key, str)
 
 
 '''

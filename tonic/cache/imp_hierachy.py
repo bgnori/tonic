@@ -8,7 +8,7 @@ import tonic.cache
 from tonic.cache import NotInCache
 
     
-class Storage(tonic.cache.Storage):
+class Storage(tonic.cache.HashableKeyStorage):
   def __init__(self, levels, *args, **kws):
     self.levels = levels
 
@@ -20,7 +20,7 @@ class Storage(tonic.cache.Storage):
         )
       self.bringUpFrom(nth - 1, key)
 
-  def mtime(self, key):
+  def _mtime(self, key):
     '''
       FIXME:
         Implement entry bring up from Level n to Level m where m < n.
@@ -34,7 +34,7 @@ class Storage(tonic.cache.Storage):
         pass
     raise NotInCache
     
-  def get(self, key):
+  def _get(self, key, default):
     '''
       FIXME:
         Implement entry bring up from Level n to Level m where m < n.
@@ -48,7 +48,7 @@ class Storage(tonic.cache.Storage):
         pass
     raise NotInCache
 
-  def set(self, key, value, mtime=None):
+  def _set(self, key, value, mtime):
     '''
       write through
     '''

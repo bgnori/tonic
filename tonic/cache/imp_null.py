@@ -8,20 +8,22 @@
 import tonic.cache 
 from tonic.cache import NotInCache
 
-class Storage(tonic.cache.Storage):
+class Storage(tonic.cache.HashableKeyStorage):
   def __init__(self, *args, **kws):
     pass
 
   def purge(self):
     pass
+
   def close(self):
     pass
-  def get(self, path):
+
+  def _get(self, key, default):
     raise NotInCache
 
-  def mtime(self, path):
+  def _mtime(self, key):
     raise NotInCache
 
-  def set(self, path, value, mtime=None):
+  def _set(self, key, value, mtime=None):
     pass
 
