@@ -4,10 +4,14 @@ VERSION
 MANIFEST
 tonic/__init__.py
 tonic/bitsarray.py
+tonic/bitsarray_test.py
 tonic/funny.py
 tonic/lineparser.py
+tonic/lineparser_test.py
 tonic/math.py
+tonic/math_test.py
 tonic/visitbus.py
+tonic/visitbus_test.py
 tonic/turbogears/__init__.py
 tonic/turbogears/cc.py
 tonic/turbogears/widgets.py
@@ -31,6 +35,7 @@ tonic/specedit/testdata/wxMGL.spec
 tonic/specedit/testdata/wxMotif.spec
 tonic/specedit/testdata/wxX11.spec
 tonic/cache/__init__.py
+tonic/cache/imp.py
 tonic/cache/imp_dict.py
 tonic/cache/imp_disk.py
 tonic/cache/imp_file.py
