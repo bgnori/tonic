@@ -41,5 +41,6 @@ tonic/cache/imp_disk.py
 tonic/cache/imp_file.py
 tonic/cache/imp_hierachy.py
 tonic/cache/imp_memcache.py
+tonic/cache/imp_null.py
 tonic/cache/perf.py
 tonic/cache/test.py
