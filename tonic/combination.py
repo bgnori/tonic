@@ -26,8 +26,8 @@ def fact(n):
     assert False
 
 def C(n, r):
-  assert n >= 0
-  assert r >= 0
+  assert n >0
+  assert r >0
   if n > r:
     return fact(n)/(fact(r) * fact(n-r))
   elif r > n:
@@ -43,11 +43,11 @@ def C_Hash(xs, r):
     given xs = (1, 0, 1, 0, 0) , have 8.
   '''
   assert hasattr(xs, '__getitem__')
+  assert r >= 0
+  hash = 0
   n = len(xs) - 1
   i = 0
-  hash = 0
   while n >= r and r > 0:
-    assert xs[i] in (1, 0)
     if xs[i]:
       hash += C(n, r)
       r-=1
@@ -56,9 +56,20 @@ def C_Hash(xs, r):
   return hash
 
 
-_r_hash = Hub()
-_r_hash.connect(Dict())
-@memoize(_r_hash)
+
+def C_RHash_naive(h, n, r):
+  '''Reverse function of C_Hash.
+    Parameters are hash value h, and n, r of C(n, r)
+    retuns xs
+
+    this provides very naive implementation
+  '''
+  for i in range(2**n):
+    xs = [i & 1 << mask and 1 or 0 for mask in range(n)]
+    if sum(xs) == r:
+      if h == C_Hash(xs, r):
+        return tuple(xs)
+
 def C_RHash(h, n, r):
   '''Reverse function of C_Hash.
     Parameters are hash value h, and n, r of C(n, r)
@@ -66,21 +77,22 @@ def C_RHash(h, n, r):
   '''
   assert n >= r
   assert r >= 0
-  xs = list()
-  for i in range(n, 0, -1):
-    if h >= C(i - 1, r):
-      xs.append(1)
-      h -= C(i - 1, r)
-      r -= 1
-    else:
-      xs.append(0)
-  return tuple(xs)
+  if n == r:
+    return tuple([1 for i in range(n)])
+  if r == 0:
+    return tuple([0 for i in range(n)])
+  if h >= C(n-1, r):
+    return (1, ) + C_RHash(h - C(n-1, r), n-1, r-1)
+  else:
+    return (0, ) + C_RHash(h, n-1, r)
+
 
 if __name__ == '__main__':
   import sys
   for r in range(10):
     for n in range(r, 20, 1):
       sys.stdout.write('.')
+      sys.stdout.flush()
       for i in range(C(n, r)):
         assert i == C_Hash(C_RHash(i, n, r), r)
 
