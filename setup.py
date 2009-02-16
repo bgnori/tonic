@@ -61,6 +61,9 @@ setup(
   py_modules=[
             'tonic.funny',
             'tonic.lineparser',
+            'tonic.combination',
+            'tonic.visitbus',
+            'tonic.bitsarray',
   ],
   install_requires = [
     "python>=2.4",
