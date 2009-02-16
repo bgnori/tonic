@@ -13,6 +13,7 @@ _fact.connect(Dict())
 
 PRECALC_FACT = 1000
 
+
 @memoize(_fact, preheat_range=[((i,), {}) for i in range(PRECALC_FACT)])
 def fact(n):
   assert n >= 0
@@ -25,6 +26,7 @@ def fact(n):
   else:
     assert False
 
+
 def C(n, r):
   assert n >0
   assert r >0
@@ -36,6 +38,7 @@ def C(n, r):
     return 1
   else:
     assert False
+
 
 def C_Hash(xs, r):
   '''Bijection from combinatorial sequence to integer, such as
