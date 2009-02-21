@@ -9,8 +9,8 @@ import unittest
 import os.path
 import StringIO
 
-from tonic.html.w3cutil import validate
-from tonic.html.py2html import *
+from tonic.markups.w3cutil import validate
+from tonic.markups.py2html import *
 
 class python2htmlTest(unittest.TestCase):
   def setUp(self):

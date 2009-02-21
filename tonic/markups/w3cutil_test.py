@@ -8,7 +8,7 @@
 import StringIO
 import unittest
 
-from tonic.html.w3cutil import *
+from tonic.markups.w3cutil import *
 
 MINIMAL = '''\
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -18,12 +18,12 @@ MINIMAL = '''\
 '''
 class w3cvalidateTest(unittest.TestCase):
   def setUp(self):
-    self.html = StringIO.StringIO(MINIMAL)
+    self.markups = StringIO.StringIO(MINIMAL)
   def tearDown(self):
     pass
 
   def test(self):
-    r = validate(self.html)
+    r = validate(self.markups)
     c = 0
     for line in r:
       if '''class="msg_err"''' in line:
