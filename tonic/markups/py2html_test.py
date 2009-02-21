@@ -9,6 +9,8 @@ import unittest
 import os.path
 import StringIO
 
+from tonic.rlimit import Lock
+
 from tonic.markups.w3cutil import validate
 from tonic.markups.py2html import *
 
@@ -30,7 +32,10 @@ class python2htmlTest(unittest.TestCase):
   def test_as_html(self):
     convert(self.input, self.output)
     self.output.seek(0)
+    lock = Lock(10)
+    lock.aquire()
     r = validate(self.output)
+    lock.release()
     self.assertEqual(r.info()['X-W3C-Validator-Status'], 'Valid')
     c = 0
     for line in r:

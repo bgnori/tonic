@@ -8,6 +8,7 @@
 import StringIO
 import unittest
 
+from tonic.rlimit import Lock
 from tonic.markups.w3cutil import *
 
 MINIMAL = '''\
@@ -23,6 +24,8 @@ class w3cvalidateTest(unittest.TestCase):
     pass
 
   def test(self):
+    lock = Lock(10)
+    lock.aquire()
     r = validate(self.markups)
     c = 0
     for line in r:
@@ -33,5 +36,6 @@ class w3cvalidateTest(unittest.TestCase):
         c -= 1
     print r.info()
     self.assertEqual(r.info()['X-W3C-Validator-Status'], 'Valid')
+    lock.release()
 
 
