@@ -15,6 +15,11 @@ tonic/visitbus_test.py
 tonic/turbogears/__init__.py
 tonic/turbogears/cc.py
 tonic/turbogears/widgets.py
+tonic/html/__init__.py
+tonic/html/py2html.py
+tonic/html/py2html_test.py
+tonic/html/w3cutil.py
+tonic/html/w3cutil_test.py
 tonic/specedit/__init__.py
 tonic/specedit/base.py
 tonic/specedit/dump.py

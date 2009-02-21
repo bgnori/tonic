@@ -1,0 +1,44 @@
+#!/usr/bin/env python
+# -*- coding: us-ascii -*-
+# vim: syntax=python
+#
+# Copyright 2009 Noriyuki Hosaka bgnori@gmail.com
+#
+
+import unittest
+import os.path
+import StringIO
+
+from tonic.html.w3cutil import validate
+from tonic.html.py2html import *
+
+class python2htmlTest(unittest.TestCase):
+  def setUp(self):
+    p = os.path.abspath(__file__)
+    self.input = file(p)
+    self.output = StringIO.StringIO()
+  def tearDown(self):
+    self.input.close()
+    self.output.close()
+
+  def test_as_file(self):
+    convert(self.input, self.output)
+    s = self.output.getvalue()
+    self.assert_('<html' in s)
+    self.assert_('/html>' in s)
+
+  def test_as_html(self):
+    convert(self.input, self.output)
+    self.output.seek(0)
+    r = validate(self.output)
+    self.assertEqual(r.info()['X-W3C-Validator-Status'], 'Valid')
+    c = 0
+    for line in r:
+      if '''class="msg_err"''' in line:
+        c = 10
+      if c > 0:
+        print line,
+        c -= 1
+    print r.info()
+    self.assertEqual(int(r.info()['X-W3C-Validator-Errors']), 0)
+
