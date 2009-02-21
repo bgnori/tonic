@@ -24,7 +24,7 @@ class w3cvalidateTest(unittest.TestCase):
     pass
 
   def test(self):
-    lock = Lock(10)
+    lock = Lock(15)
     lock.aquire()
     r = validate(self.markups)
     c = 0

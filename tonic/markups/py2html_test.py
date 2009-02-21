@@ -32,7 +32,7 @@ class python2htmlTest(unittest.TestCase):
   def test_as_html(self):
     convert(self.input, self.output)
     self.output.seek(0)
-    lock = Lock(10)
+    lock = Lock(15)
     lock.aquire()
     r = validate(self.output)
     lock.release()
