@@ -25,20 +25,20 @@ class python2htmlTest(unittest.TestCase):
     self.output.close()
 
   def test_as_file(self):
-    convert(self.input, self.output)
+    formatter = Formatter(self.input, self.output)
+    formatter.html()
     s = self.output.getvalue()
     self.assert_('<html' in s)
     self.assert_('/html>' in s)
 
   def test_as_html(self):
-    convert(self.input, self.output)
+    formatter = Formatter(self.input, self.output)
+    formatter.html()
     self.output.seek(0)
     lock = Lock(15)
     lock.aquire()
     r = validate(self.output)
     lock.release()
-    print r.info()
-    self.assertEqual(r.info()['X-W3C-Validator-Status'], 'Valid')
     c = 0
     for line in r:
       if '''class="msg_err"''' in line:
@@ -47,5 +47,6 @@ class python2htmlTest(unittest.TestCase):
         print line,
         c -= 1
     print r.info()
+    self.assertEqual(r.info()['X-W3C-Validator-Status'], 'Valid')
     self.assertEqual(int(r.info()['X-W3C-Validator-Errors']), 0)
 

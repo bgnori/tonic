@@ -1,0 +1,16 @@
+body {
+    counter-reset: lineno;
+}
+.codeblock {
+    white-space: pre-wrap; /* CSS3 */
+    white-space: -moz-pre-wrap; /* Gecho(FireFox, Mozilla) */
+    white-space: -o-pre-wrap; /* opera */
+    white-space: -pre-wrap; /* old */
+    word-wrap: break-wrap; /* IE5.5 or later + Safari */
+    background: black; /* debug color */
+}
+code:before {
+    content: 'line:'counter(lineno, decimal-leading-zero)' ';
+    counter-increment: lineno;
+}
+
