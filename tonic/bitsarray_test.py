@@ -14,6 +14,13 @@ class BitsArrayTest(unittest.TestCase):
     self.assertEqual(b.endian, '<')
     self.assertEqual(b.binary, '\x00')
 
+  def BitsArrayCreation_testBad(self):
+    try:
+      b = BitsArray(1, '\x00\x00')
+      self.assert_(False)
+    except ValueError:
+      pass
+
   def BitsArrayIndex_test(self):
     b = BitsArray(8, '\x00')
     self.assertEqual(b[0], 0)
