@@ -19,6 +19,7 @@ class python2htmlTest(unittest.TestCase):
     p = os.path.abspath(__file__)
     self.input = file(p)
     self.output = StringIO.StringIO()
+
   def tearDown(self):
     self.input.close()
     self.output.close()
@@ -36,6 +37,7 @@ class python2htmlTest(unittest.TestCase):
     lock.aquire()
     r = validate(self.output)
     lock.release()
+    print r.info()
     self.assertEqual(r.info()['X-W3C-Validator-Status'], 'Valid')
     c = 0
     for line in r:
