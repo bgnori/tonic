@@ -28,31 +28,35 @@ class Bot(object):
     self.grp_addr = grp_addr
     self.out = out
 
+  def write(self, s):
+    self.out.write(s)
+
   def run(self):
-    self.get()
-    tobepost = self.check()
+    feed = self.get()
+    tobepost = self.check(feed)
     if not tobepost:
-      print 'no new post found'
+      self.write('no new post found.\n')
       return
-    print len(tobepost), ' new posts found'
+    self.write('%i new posts found.\n'%(len(tobepost)))
     tosend = self.make_messages(tobepost)
-    print 'connecting to mail server.'
+
+    self.write('connecting to mail server.\n')
     self.mail(tosend)
-    print 'sent'
-    print 'done.'
+    self.write('sent.\n')
+    self.write('done.\n')
 
   def get(self):
-    print 'getting feed'
+    self.write('getting feed from "%s".\n'%(self.feed_url))
     f = urllib.urlopen(self.feed_url)
     try:
-      self.feed  = feedparser.parse(f.read())
+      return feedparser.parse(f.read())
     finally:
       f.close()
 
-  def check(self):
+  def check(self, feed):
     tobepost = []
     now = dt.utcnow()
-    for entry in x.entries:
+    for entry in feed.entries:
       generated = dt(*entry.updated_parsed[:5])
       delta = generated - now
       if delta.days == 0 and delta.seconds < 3600:
@@ -77,10 +81,11 @@ class Bot(object):
       con.starttls()
       con.ehlo()
       con.login(self.sender_addr, self.password)
-      print 'sending',
+      self.write('sending with %s to %s\n'
+                  %(self.sender_addr, self.grp_addr))
       for msg in tosend:
-        print '.',
         con.sendmail(self.sender_addr, self.grp_addr, msg.as_string())
+        self.write('.')
     finally:
       con.close()
 
