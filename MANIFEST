@@ -3,6 +3,8 @@ setup.py
 VERSION
 MANIFEST
 tonic/__init__.py
+tonic/feed2mail.py
+tonic/feed2mail_test.py
 tonic/bitsarray.py
 tonic/bitsarray_test.py
 tonic/funny.py
