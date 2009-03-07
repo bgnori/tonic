@@ -5,9 +5,12 @@
 # Copyright 2009 Noriyuki Hosaka bgnori@gmail.com
 #
 
+import os.path
 import sys
 import time
 from datetime import datetime as dt
+import pickle
+
 import urllib
 import feedparser
 import smtplib
@@ -16,35 +19,53 @@ from email.Utils import formatdate
 
 
 class Bot(object):
-  def __init__(self, feed_url, bot_addr, 
-                     sender_addr, password, server, grp_addr,
-                     out=None):
+  def __init__(self, out=None, **kw):
+  #feed_url, bot_addr, sender_addr, password, server, grp_addr,
     if out is None:
       out = sys.stdout
-    self.feed_url = feed_url
-    self.bot_addr = bot_addr
-    self.sender_addr = sender_addr
-    self.password = password
-    self.grp_addr = grp_addr
-    self.server = server
     self.out = out
+    self.depot = kw
+
+  def __getattr__(self, name):
+    assert name in ("feed_url", "bot_addr", 
+                    "sender_addr", "password", 
+                    "grp_addr", "server",
+                    "mailbody", "mailsubject",
+                    "last",)
+    return self.__dict__['depot'][name]
 
   def write(self, s):
     self.out.write(s)
 
   def run(self):
     feed = self.get(self.feed_url)
-    tobepost = self.check(feed)
-    if not tobepost:
-      self.write('no new post found.\n')
-      return
-    self.write('%i new posts found.\n'%(len(tobepost)))
 
-    messages = self.make_messages(tobepost)
 
     self.write('connecting to mail server.\n')
-    self.mail(messages)
-    self.write('sent.\n')
+
+    con = smtplib.SMTP(self.server)
+    c = 0
+    try:
+      con.ehlo()
+      con.starttls()
+      con.ehlo()
+      con.login(self.sender_addr, self.password)
+      self.write('sending with %s to %s\n'
+                  %(self.sender_addr, self.grp_addr))
+      for entry in feed.entries:
+        generated = dt(*entry.updated_parsed[:5])
+        if generated > self.lastupdate():
+          msg = self.make_message(entry)
+          con.sendmail(self.sender_addr, self.grp_addr, msg.as_string())
+          self.update(generated)
+          c += 1
+          self.write('.')
+    finally:
+      con.close()
+    if c > 0:
+      self.write('sent.\n')
+    else:
+      self.write('no item to work with.\n')
     self.write('done.\n')
     return 
 
@@ -56,39 +77,34 @@ class Bot(object):
     finally:
       f.close()
 
-  def check(self, feed):
-    tobepost = []
-    now = dt.utcnow()
-    for entry in feed.entries:
-      generated = dt(*entry.updated_parsed[:5])
-      delta = generated - now
-      #if delta.days == 0 and delta.seconds < 3600:
-      tobepost.append(entry)
-    return tobepost
+  def lastupdate(self):
+    path = os.path.abspath(self.last)
+    if not os.path.exists(path):
+      return dt(1900, 1, 1)
+    else:
+      f = file(path)
+      try:
+        t = pickle.load(f)
+      finally:
+        f.close()
+      assert isinstance(t, dt)
+      return t
 
-  def make_messages(self, tobepost):
-    messages = []
-    for entry in tobepost:
-      msg = MIMEText(entry.summary.encode('utf-8'), 'plain', 'utf-8')
-      msg['Subject'] = entry.title.encode('utf-8')
-      msg['From'] = self.bot_addr 
-      msg['To'] = self.grp_addr 
-      msg['Date'] = formatdate()
-      messages.append(msg)
-    return messages
-
-  def mail(self, messages):
-    con = smtplib.SMTP(self.server)
+  def update(self, t):
+    assert isinstance(t, dt)
+    path = os.path.abspath(self.last)
+    f = file(path, 'w')
     try:
-      con.ehlo()
-      con.starttls()
-      con.ehlo()
-      con.login(self.sender_addr, self.password)
-      self.write('sending with %s to %s\n'
-                  %(self.sender_addr, self.grp_addr))
-      for msg in messages:
-        con.sendmail(self.sender_addr, self.grp_addr, msg.as_string())
-        self.write('.')
+      pickle.dump(t, f)
     finally:
-      con.close()
+      f.close()
+    
+  def make_message(self, entry):
+    msg = MIMEText(self.mailbody(entry).encode('utf-8'), 'plain', 'utf-8')
+    msg['Subject'] = self.mailsubject(entry).encode('utf-8')
+    msg['From'] = self.bot_addr 
+    msg['To'] = self.grp_addr 
+    msg['Date'] = formatdate()
+    return msg
+
 
