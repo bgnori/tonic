@@ -31,7 +31,7 @@ class Bot(object):
                     "sender_addr", "password", 
                     "grp_addr", "server",
                     "mailbody", "mailsubject",
-                    "last",)
+                    "last",), '%s is not in list'%name
     return self.__dict__['depot'][name]
 
   def write(self, s):
@@ -40,9 +40,7 @@ class Bot(object):
   def run(self):
     feed = self.get(self.feed_url)
 
-
     self.write('connecting to mail server.\n')
-
     con = smtplib.SMTP(self.server)
     c = 0
     try:
@@ -52,7 +50,7 @@ class Bot(object):
       con.login(self.sender_addr, self.password)
       self.write('sending with %s to %s\n'
                   %(self.sender_addr, self.grp_addr))
-      for entry in feed.entries:
+      for entry in reversed(feed.entries):
         generated = dt(*entry.updated_parsed[:5])
         if generated > self.lastupdate():
           msg = self.make_message(entry)

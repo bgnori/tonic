@@ -32,27 +32,19 @@ class BotTest(unittest.TestCase):
       pass
 
   def test_get(self):
-    print self.bot.get('http://nori-on-baking.blogspot.com/feeds/posts/default')
-
-  def test_check(self):
     feed = self.bot.get('http://nori-on-baking.blogspot.com/feeds/posts/default')
-    new = self.bot.check(feed)
-    print new
-    self.assert_(len(new))
+    print feed
+    self.assert_(len(feed))
 
   def test_make_message(self):
     feed = self.bot.get('http://nori-on-baking.blogspot.com/feeds/posts/default')
-    news = self.bot.check(feed)
-    msgs = self.bot.make_messages(news)
-    for m in msgs:
+    for entry in feed.entries:
+      m = self.bot.make_message(entry)
       print '='*60
       print m
       print '='*60
       self.assertEqual(m['From'], 'bot_addr')
       self.assertEqual(m['To'], 'grp_addr')
       self.assertEqual(m['Content-Type'], 'text/plain; charset="utf-8"')
-
-  def test_mail(self):
-    pass
       
 
