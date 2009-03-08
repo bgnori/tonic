@@ -68,9 +68,9 @@ def replproc(mobj):
   if 'tag2crlf' in d:
     return u'\n'
   if 'lsaquo' in d:
-    return '\u8249'
+    return u'\u8249'
   if 'rsaquo' in d:
-    return '\u8250'
+    return u'\u8250'
   if 'amp' in d:
     return u'&'
 
