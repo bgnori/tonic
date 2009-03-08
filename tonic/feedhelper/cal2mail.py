@@ -15,7 +15,7 @@ import smtplib
 import urllib
 
 from BeautifulSoup import BeautifulSoup as Parser
-import tonic.mailingbot
+import tonic.feedhelper.mailingbot
 
 '''
 http://www.backgammon.gr.jp/EventSchedule/calendar/calendar.cgi?action=memo&yy=2009&mm=3&dd=8&id=1408
@@ -84,7 +84,7 @@ class Bot(tonic.mailingbot.Bot):
       m = parseOnClick.search(a['onclick'])
       if m:
         d = m.groupdict()
-        #print d['year'], d['month'], d['day'], d['id']
+        print d['year'], d['month'], d['day'], d['id']
         memo = '''http://www.backgammon.gr.jp/EventSchedule/calendar/calendar.cgi'''
         if int(d['day']) == tomorrow.day:
           option = urllib.urlencode(dict(

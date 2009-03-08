@@ -10,7 +10,7 @@ import urllib
 import feedparser
 import smtplib
 
-import tonic.mailingbot
+import tonic.feedhelper.mailingbot
 
 class Item(tonic.mailingbot.Item):
   def __init__(self, bot, entry):
