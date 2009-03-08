@@ -7,7 +7,7 @@
 
 import unittest
 import os
-from tonic.feed2mail import Bot
+from tonic.feedhelper.feed2mail import Bot
 
 class BotTest(unittest.TestCase):
   def setUp(self):

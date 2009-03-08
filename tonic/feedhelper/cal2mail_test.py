@@ -8,7 +8,8 @@
 import StringIO
 import unittest
 import os
-from tonic.cal2post import Bot
+from datetime import datetime as dt
+from tonic.feedhelper.cal2mail import Bot
 
 class BotTest(unittest.TestCase):
   def setUp(self):
@@ -33,7 +34,7 @@ class BotTest(unittest.TestCase):
     print container
 
   def test_make_message(self):
-    container = self.bot.get('http://www.backgammon.gr.jp/EventSchedule/calendar/calendar.cgi')
+    container = self.bot.get('http://www.backgammon.gr.jp/EventSchedule/calendar/calendar.cgi', now=dt(2009, 3, 6))
 
     for item in container:
       m = item.make_message(self.bot)
@@ -43,5 +44,5 @@ class BotTest(unittest.TestCase):
       self.assertEqual(m['From'], 'bot_addr')
       self.assertEqual(m['To'], 'grp_addr')
       self.assertEqual(m['Content-Type'], 'text/plain; charset="utf-8"')
-      
+      self.assert_(str(m['Subject']).startswith('=?utf-8'))
 

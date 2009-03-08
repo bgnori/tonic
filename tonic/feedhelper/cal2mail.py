@@ -37,8 +37,9 @@ parseOnClick = re.compile((
   ))
 
 
-class Item(tonic.mailingbot.Item):
+class Item(tonic.feedhelper.mailingbot.Item):
   def __init__(self, bot, uhtml):
+    assert isinstance(uhtml, unicode)
     self._imp = uhtml 
     self._bot = bot
 
@@ -54,14 +55,15 @@ class Item(tonic.mailingbot.Item):
     p.feed(self._imp)
     p.goahead(0)
     td = p.find('td', attrs={'class':'moji'})
-    return repr(td).decode('utf8')#ugh!
+    return str(td).decode('utf8')#ugh!
 
 
-class Bot(tonic.mailingbot.Bot):
-  def get(self, url):
+class Bot(tonic.feedhelper.mailingbot.Bot):
+  def get(self, url, now=None):
     #ym=2009.3
     #vmode=itiran
-    now = dt.now()
+    if now is None:
+      now = dt.now()
     tomorrow = now + delta(1)
 
     option = urllib.urlencode(dict(
@@ -84,7 +86,7 @@ class Bot(tonic.mailingbot.Bot):
       m = parseOnClick.search(a['onclick'])
       if m:
         d = m.groupdict()
-        print d['year'], d['month'], d['day'], d['id']
+        #print d['year'], d['month'], d['day'], d['id']
         memo = '''http://www.backgammon.gr.jp/EventSchedule/calendar/calendar.cgi'''
         if int(d['day']) == tomorrow.day:
           option = urllib.urlencode(dict(

@@ -4,30 +4,32 @@
 #
 # Copyright 2009 Noriyuki Hosaka bgnori@gmail.com
 #
-from datetime import datetime as dt
 
+import os.path
+from datetime import datetime as dt
 import urllib
+import pickle
 import feedparser
 import smtplib
 
 import tonic.feedhelper.mailingbot
 
-class Item(tonic.mailingbot.Item):
+class Item(tonic.feedhelper.mailingbot.Item):
   def __init__(self, bot, entry):
     self._imp = entry
     self._bot = bot
 
   def mailbody(self):
-    return self._imp.content[0].value
+    return self._imp.summary
 
   def mailsubject(self):
     return u'jbl hokkaido news:' + self._imp.title
 
   def sendP(self):
-    return dt(*entry.updated_parsed[:5]) > self.lastupdate()
+    return dt(*self._imp.updated_parsed[:5]) > self.lastupdate()
 
   def mark_as_sent(self):
-    t = dt(*entry.updated_parsed[:5])
+    t = dt(*self._imp.updated_parsed[:5])
     path = os.path.abspath(self._bot.last)
     f = file(path, 'w')
     try:
@@ -36,7 +38,7 @@ class Item(tonic.mailingbot.Item):
       f.close()
 
   def lastupdate(self):
-    path = os.path.abspath(self.last)
+    path = os.path.abspath(self._bot.last)
     if not os.path.exists(path):
       return dt(1900, 1, 1)
     else:
@@ -49,8 +51,8 @@ class Item(tonic.mailingbot.Item):
       return t
   
 
-class Bot(tonic.mailingbot.Bot):
-  def get(self, url):
+class Bot(tonic.feedhelper.mailingbot.Bot):
+  def get(self, url, now=None):
     self.write('getting feed from "%s".\n'%(url))
     f = urllib.urlopen(url)
     try:

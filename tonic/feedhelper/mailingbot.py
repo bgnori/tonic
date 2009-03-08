@@ -9,12 +9,12 @@ import os.path
 import sys
 import time
 from datetime import datetime as dt
-import pickle
 
 import urllib
 import feedparser
 import smtplib
 from email.MIMEText import MIMEText
+from email.Header import Header 
 from email.Utils import formatdate
 
 
@@ -33,11 +33,12 @@ class Item(object):
 
   def make_message(self, bot):
     msg = MIMEText(self.mailbody().encode('utf-8'), 'plain', 'utf-8')
-    msg['Subject'] = self.mailsubject().encode('utf-8')
+    msg['Subject'] = Header(self.mailsubject().encode('utf-8'), 'utf-8')
     msg['From'] = bot.bot_addr
     msg['To'] = bot.grp_addr
     msg['Date'] = formatdate()
     return msg
+
 
 class Bot(object):
   def __init__(self, out=None, **kw):
@@ -56,7 +57,6 @@ class Bot(object):
 
   def write(self, s):
     self.out.write(s)
-
     
   def mail(self, container):
     self.write('connecting to mail server.\n')
@@ -83,8 +83,8 @@ class Bot(object):
     else:
       self.write('no item to work with.\n')
 
-  def run(self):
-    container = self.get(self.feed_url)
+  def run(self, now=None):
+    container = self.get(self.feed_url, now)
     self.mail(container)
     self.write('done.\n')
     return 
