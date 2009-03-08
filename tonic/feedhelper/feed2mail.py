@@ -26,10 +26,10 @@ class Item(tonic.feedhelper.mailingbot.Item):
     return u'jbl hokkaido news:' + self._imp.title
 
   def sendP(self):
-    return dt(*self._imp.updated_parsed[:5]) > self.lastupdate()
+    return dt(*self._imp.updated_parsed[:6]) > self.lastupdate()
 
   def mark_as_sent(self):
-    t = dt(*self._imp.updated_parsed[:5])
+    t = dt(*self._imp.updated_parsed[:6])
     path = os.path.abspath(self._bot.last)
     f = file(path, 'w')
     try:
