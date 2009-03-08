@@ -5,7 +5,6 @@
 # Copyright 2008 Noriyuki Hosaka bgnori@gmail.com
 #
 
-import StringIO
 import unittest
 import os
 from tonic.feed2mail import Bot
@@ -19,10 +18,6 @@ class BotTest(unittest.TestCase):
           password='password', 
           grp_addr='grp_addr',
           server='server',
-          storage=StringIO.StringIO(),
-          mailbody = lambda x: x.content[0].value,
-          mailsubject = lambda x: x.title,
-          last='feed2mail_lastfile',
           )
 
   def tearDown(self):
@@ -34,12 +29,11 @@ class BotTest(unittest.TestCase):
   def test_get(self):
     feed = self.bot.get('http://nori-on-baking.blogspot.com/feeds/posts/default')
     print feed
-    self.assert_(len(feed))
 
   def test_make_message(self):
-    feed = self.bot.get('http://nori-on-baking.blogspot.com/feeds/posts/default')
-    for entry in feed.entries:
-      m = self.bot.make_message(entry)
+    container = self.bot.get('http://nori-on-baking.blogspot.com/feeds/posts/default')
+    for item in container:
+      m = item.make_message(self.bot)
       print '='*60
       print m
       print '='*60

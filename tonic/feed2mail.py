@@ -12,42 +12,58 @@ import smtplib
 
 import tonic.mailingbot
 
-class Bot(tonic.mailingbot.Bot):
-  def run(self):
-    feed = self.get(self.feed_url)
+class Item(tonic.mailingbot.Item):
+  last='/home/nori/Desktop/work/tonic/bygit/jblhokkaido_last'
+  def __init__(self, entry):
+    self._imp = entry
 
-    self.write('connecting to mail server.\n')
-    con = smtplib.SMTP(self.server)
-    c = 0
+  def mailbody(self):
+    return self._imp.content[0].value
+
+  def mailsubject(self):
+    return u'jbl hokkaido news:' + self._imp.title
+
+  def sendP(self):
+    return dt(*entry.updated_parsed[:5]) > self.lastupdate()
+
+  def mark_as_sent(self, bot):
+    t = dt(*entry.updated_parsed[:5])
+    path = os.path.abspath(bot.last)
+    f = file(path, 'w')
     try:
-      con.ehlo()
-      con.starttls()
-      con.ehlo()
-      con.login(self.sender_addr, self.password)
-      self.write('sending with %s to %s\n'
-                  %(self.sender_addr, self.grp_addr))
-      for entry in reversed(feed.entries):
-        generated = dt(*entry.updated_parsed[:5])
-        if generated > self.lastupdate():
-          msg = self.make_message(entry)
-          con.sendmail(self.sender_addr, self.grp_addr, msg.as_string())
-          self.update(generated)
-          c += 1
-          self.write('.')
+      pickle.dump(t, f)
     finally:
-      con.close()
-    if c > 0:
-      self.write('sent.\n')
-    else:
-      self.write('no item to work with.\n')
-    self.write('done.\n')
-    return 
+      f.close()
 
+  def lastupdate(self):
+    path = os.path.abspath(self.last)
+    if not os.path.exists(path):
+      return dt(1900, 1, 1)
+    else:
+      f = file(path)
+      try:
+        t = pickle.load(f)
+      finally:
+        f.close()
+      assert isinstance(t, dt)
+      return t
+  
+
+class FeedContainer(tonic.mailingbot.ContainerIF):
+  def __init__(self, feed):
+    self._feed = feed
+  def __iter__(self):
+    for entry in reversed(self._feed.entries):
+      yield Item(entry)
+
+
+class Bot(tonic.mailingbot.Bot):
   def get(self, url):
     self.write('getting feed from "%s".\n'%(url))
     f = urllib.urlopen(url)
     try:
-      return feedparser.parse(f.read())
+      return FeedContainer(feedparser.parse(f.read()))
     finally:
       f.close()
+
 
