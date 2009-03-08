@@ -42,7 +42,7 @@ tagStrip = re.compile((
     r'|(/span)'
     r'|(p)'
     r'|(/p)'
-    r'|(a href="[^>]*)'
+    r'|(a[^>]*)'
     r'|(/a)'
     r'|(td [^>]*)'
     r'|(/td)'
@@ -52,6 +52,7 @@ tagStrip = re.compile((
     r')>)'
    r'|(?P<tag2crlf><('
     r'(br /)'
+    r'|(br)'
     r')>)'
    r'|(?P<entityref2char>'
     r'(?P<lsaquo>&lsaquo;)'
@@ -63,15 +64,15 @@ tagStrip = re.compile((
 def replproc(mobj):
   d = mobj.groupdict()
   if 'tag2empty' in d:
-    return ''
+    return u' '
   if 'tag2crlf' in d:
-    return '\n'
+    return u'\n'
   if 'lsaquo' in d:
-    return '<'
+    return '\u8249'
   if 'rsaquo' in d:
-    return '>'
+    return '\u8250'
   if 'amp' in d:
-    return '&'
+    return u'&'
 
 class Item(tonic.feedhelper.mailingbot.Item):
   def __init__(self, bot, uhtml):
