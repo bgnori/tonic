@@ -13,9 +13,9 @@ import smtplib
 import tonic.mailingbot
 
 class Item(tonic.mailingbot.Item):
-  last='/home/nori/Desktop/work/tonic/bygit/jblhokkaido_last'
-  def __init__(self, entry):
+  def __init__(self, bot, entry):
     self._imp = entry
+    self._bot = bot
 
   def mailbody(self):
     return self._imp.content[0].value
@@ -26,9 +26,9 @@ class Item(tonic.mailingbot.Item):
   def sendP(self):
     return dt(*entry.updated_parsed[:5]) > self.lastupdate()
 
-  def mark_as_sent(self, bot):
+  def mark_as_sent(self):
     t = dt(*entry.updated_parsed[:5])
-    path = os.path.abspath(bot.last)
+    path = os.path.abspath(self._bot.last)
     f = file(path, 'w')
     try:
       pickle.dump(t, f)
@@ -49,21 +49,16 @@ class Item(tonic.mailingbot.Item):
       return t
   
 
-class FeedContainer(tonic.mailingbot.ContainerIF):
-  def __init__(self, feed):
-    self._feed = feed
-  def __iter__(self):
-    for entry in reversed(self._feed.entries):
-      yield Item(entry)
-
-
 class Bot(tonic.mailingbot.Bot):
   def get(self, url):
     self.write('getting feed from "%s".\n'%(url))
     f = urllib.urlopen(url)
     try:
-      return FeedContainer(feedparser.parse(f.read()))
+      feed = feedparser.parse(f.read())
+      def xxx():
+        for entry in reversed(feed.entries):
+          yield Item(self, entry)
+      return xxx()
     finally:
       f.close()
-
 

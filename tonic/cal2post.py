@@ -37,50 +37,27 @@ parseOnClick = re.compile((
   ))
 
 
-class Bot(tonic.mailingbot.Bot):
-  def run(self):
-    pages = self.get(self.feed_url)
+class Item(tonic.mailingbot.Item):
+  def __init__(self, bot, uhtml):
+    self._imp = uhtml 
+    self._bot = bot
 
-    self.write('connecting to mail server.\n')
-    con = smtplib.SMTP(self.server)
-    c = 0
-    try:
-      con.ehlo()
-      con.starttls()
-      con.ehlo()
-      con.login(self.sender_addr, self.password)
-      self.write('sending with %s to %s\n'
-                  %(self.sender_addr, self.grp_addr))
-      for uhtml in pages:
-        msg = self.make_message(uhtml)
-        con.sendmail(self.sender_addr, self.grp_addr, msg.as_string())
-        c += 1
-        self.write('.')
-    finally:
-      con.close()
-    if c > 0:
-      self.write('sent.\n')
-    else:
-      self.write('no item to work with.\n')
-    self.write('done.\n')
-    return 
-
-  def mailsubject(self, uhtml):
+  def mailsubject(self):
     p = Parser()
-    p.feed(uhtml)
+    p.feed(self._imp)
     p.goahead(0)
     div = p.find('div', attrs={'class':'moji'})
     return str(div.contents[0]).decode('utf8')
 
-  def mailbody(self, uhtml):
+  def mailbody(self):
     p = Parser()
-    p.feed(uhtml)
+    p.feed(self._imp)
     p.goahead(0)
     td = p.find('td', attrs={'class':'moji'})
     return repr(td).decode('utf8')#ugh!
-    #return td#.p.contents
-    #return ''.join([str(c) for c in td.p.contents])
 
+
+class Bot(tonic.mailingbot.Bot):
   def get(self, url):
     #ym=2009.3
     #vmode=itiran
@@ -91,14 +68,12 @@ class Bot(tonic.mailingbot.Bot):
           ym='%i.%i'%(now.year, now.month),
           vmode='itiran'
           ))
-    #print option
     url += '?' + option
     self.write('getting feed from "%s".\n'%(url))
 
     p = Parser()
     f = urllib.urlopen(url)
     try:
-      #f.read()
       p.feed(f.read().decode('Shift-JIS'))
       p.goahead(0)
     finally:
@@ -106,7 +81,6 @@ class Bot(tonic.mailingbot.Bot):
 
     pages = []
     for a in p.findAll('a', attrs=dict(href="javaScript:void(0)")):
-      #print a['onclick']
       m = parseOnClick.search(a['onclick'])
       if m:
         d = m.groupdict()
@@ -125,7 +99,7 @@ class Bot(tonic.mailingbot.Bot):
             uhtml = f.read().decode('Shift-JIS')
           finally:
             f.close()
-          pages.append(uhtml)
+          pages.append(Item(self, uhtml))
     return pages
 
 

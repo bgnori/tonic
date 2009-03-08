@@ -17,6 +17,7 @@ class BotTest(unittest.TestCase):
           sender_addr='sender_addr', 
           password='password', 
           grp_addr='grp_addr',
+          last='feed2mail_lastfile',
           server='server',
           )
 

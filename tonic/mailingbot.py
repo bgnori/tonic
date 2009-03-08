@@ -21,12 +21,14 @@ from email.Utils import formatdate
 class Item(object):
   def mailbody(self):
     pass
+
   def mailsubject(self):
     pass
+
   def sendP(self):
     return True
+
   def mark_as_sent(self):
-    self.bot_addr 
     pass
 
   def make_message(self, bot):
@@ -36,11 +38,6 @@ class Item(object):
     msg['To'] = bot.grp_addr
     msg['Date'] = formatdate()
     return msg
-
-class ContainerIF(object):
-  def __iter__(self):
-    raise StopIteration
-
 
 class Bot(object):
   def __init__(self, out=None, **kw):
@@ -62,8 +59,6 @@ class Bot(object):
 
     
   def mail(self, container):
-    assert isinstance(container, ContainerIF)
-
     self.write('connecting to mail server.\n')
     con = smtplib.SMTP(self.server)
     c = 0
