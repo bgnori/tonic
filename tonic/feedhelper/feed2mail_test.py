@@ -28,11 +28,11 @@ class BotTest(unittest.TestCase):
       pass
 
   def test_get(self):
-    feed = self.bot.get('http://nori-on-baking.blogspot.com/feeds/posts/default')
+    feed = self.bot.get("http://www.gammon.jp/jbl-h/modules/news/rss.php")
     print feed
 
   def test_make_message(self):
-    container = self.bot.get('http://nori-on-baking.blogspot.com/feeds/posts/default')
+    container = self.bot.get("http://www.gammon.jp/jbl-h/modules/news/rss.php")
     for item in container:
       m = item.make_message(self.bot)
       print '='*60

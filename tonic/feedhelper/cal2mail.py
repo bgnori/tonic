@@ -36,6 +36,42 @@ parseOnClick = re.compile((
   r'id=(?P<id>\d+)"'
   ))
 
+tagStrip = re.compile((
+   r'(?P<tag2empty><('
+    r'(span)'
+    r'|(/span)'
+    r'|(p)'
+    r'|(/p)'
+    r'|(a href="[^>]*)'
+    r'|(/a)'
+    r'|(td [^>]*)'
+    r'|(/td)'
+    r'|(img[^>]*)'
+    r'|(h\d[^>]*)'
+    r'|(/h\d)'
+    r')>)'
+   r'|(?P<tag2crlf><('
+    r'(br /)'
+    r')>)'
+   r'|(?P<entityref2char>'
+    r'(?P<lsaquo>&lsaquo;)'
+    r'|(?P<rsaquo>&rsaquo;)'
+    r'|(?P<amp>&[ ]*amp[ ]*;)'
+    r')'
+  ))
+
+def replproc(mobj):
+  d = mobj.groupdict()
+  if 'tag2empty' in d:
+    return ''
+  if 'tag2crlf' in d:
+    return '\n'
+  if 'lsaquo' in d:
+    return '<'
+  if 'rsaquo' in d:
+    return '>'
+  if 'amp' in d:
+    return '&'
 
 class Item(tonic.feedhelper.mailingbot.Item):
   def __init__(self, bot, uhtml):
@@ -48,6 +84,7 @@ class Item(tonic.feedhelper.mailingbot.Item):
     p.feed(self._imp)
     p.goahead(0)
     div = p.find('div', attrs={'class':'moji'})
+    #FIXME assuming BeautifulSoup uses utf8
     return str(div.contents[0]).decode('utf8')
 
   def mailbody(self):
@@ -55,7 +92,9 @@ class Item(tonic.feedhelper.mailingbot.Item):
     p.feed(self._imp)
     p.goahead(0)
     td = p.find('td', attrs={'class':'moji'})
-    return str(td).decode('utf8')#ugh!
+    #FIXME assuming BeautifulSoup uses utf8
+    u = str(td).decode('utf8')
+    return tagStrip.sub(replproc, u)
 
 
 class Bot(tonic.feedhelper.mailingbot.Bot):
