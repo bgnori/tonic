@@ -10,6 +10,8 @@ import sys
 import os.path
 from htmlentitydefs import entitydefs
 
+from tonic.lineparser import LineParser
+
 _d = dict([(value, '&'+key+';') for key, value in entitydefs.items()])
 
 def escape(s):
@@ -25,14 +27,20 @@ def resource(name):
   finally:
     f.close()
 
-class Formatter(object):
+class Formatter(LineParser):
   css_src = resource('python.css')
+  _first = (r'(?P<function>(\A *def +'
+            r'(?P<func_name>(\w+))'
+            r'\((?P<func_args>[^)]*)\):))'
+            )
   def __init__(self, instream, outstream):
+    super(Formatter, self).__init__()
     self.instream = instream
     self.outstream = outstream
 
   def write(self, s):
     return self.outstream.write(s)
+
   def flush(self):
     self.outstream.flush()
 
@@ -47,10 +55,29 @@ class Formatter(object):
     self.css()
     self.write('''--></style>\n''')
 
+  def handle_function(self, match, matchobj):
+    rest = match.strip()
+    self.write('<code>')
+    self.write(' '*(len(match) - len(rest)))
+    self.write('<span class="python-def">def</span>')
+    assert rest.startswith('def ')
+    rest = rest[4:]
+    d = matchobj.groupdict()
+    self.write('<span class="python-func-name">')
+    self.write(d['func_name'])
+    self.write('</span>(')
+    args = d.get('func_args', None)
+    if args:
+      self.write(escape(args))
+    self.write('):')
+    self.write('</code>\n')
+    return True
+    
   def codeblock(self):
     self.write('<pre class="codeblock">')
     for line in self.instream:
-      self.write('<code>' + escape(line.strip('\n')) + '</code>\n')
+      if not self.parse(line):
+        self.write('<code>' + escape(line.strip('\n')) + '</code>\n')
     self.write('</pre>')
 
   def doctype(self):

@@ -111,7 +111,7 @@ class Hub(object):
 
 hub = Hub()
 
-def memoize(hub, preheat_range=None, hash_proc=None):
+def memoize(hub, hash_proc=None, preheat_range=None):
   def entangle(func):
     entangle.__dict__['first'] = True #ugh!
     def memoize(func, *args, **kws):

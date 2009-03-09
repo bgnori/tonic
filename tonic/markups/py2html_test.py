@@ -24,6 +24,14 @@ class python2htmlTest(unittest.TestCase):
     self.input.close()
     self.output.close()
 
+  def test_regexp_function(self):
+    print Formatter.regexp
+    print Formatter.regexp_str
+    self.assert_(Formatter.regexp.match('def foo():'))
+    self.assert_(Formatter.regexp.match('  def foo():'))
+    self.assert_(Formatter.regexp.match('  def foo(x):'))
+    self.assert_(Formatter.regexp.match('  def foo(x, y):'))
+
   def test_as_file(self):
     formatter = Formatter(self.input, self.output)
     formatter.html()
