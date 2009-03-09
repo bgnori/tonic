@@ -3,8 +3,6 @@ setup.py
 VERSION
 MANIFEST
 tonic/__init__.py
-tonic/feed2mail.py
-tonic/feed2mail_test.py
 tonic/bitsarray.py
 tonic/bitsarray_test.py
 tonic/funny.py
@@ -14,6 +12,10 @@ tonic/combination.py
 tonic/combination_test.py
 tonic/visitbus.py
 tonic/visitbus_test.py
+tonic/feedhelper/__init__.py
+tonic/feedhelper/cal2mail.py
+tonic/feedhelper/feed2mail.py
+tonic/feedhelper/mailingbot.py
 tonic/turbogears/__init__.py
 tonic/turbogears/cc.py
 tonic/turbogears/widgets.py
