@@ -21,6 +21,11 @@ class BitsArrayTest(unittest.TestCase):
     except ValueError:
       pass
 
+  def BitsArray_set_shiftable_test(self):
+    b = BitsArray(8, '\x00')
+    b.set_shiftable(1, 0, 8)
+    self.assertEqual(int(b), 1)
+
   def BitsArrayIndex_test(self):
     b = BitsArray(8, '\x00')
     self.assertEqual(b[0], 0)
@@ -64,18 +69,18 @@ class BitsArrayTest(unittest.TestCase):
   def BitsArraySlice3_test(self):
     b = BitsArray(8, '\x00')
     b[0] = 1
-    self.assertEqual(b.int(), 1)
+    self.assertEqual(int(b), 1)
 
   def BitsArraySlice4_test(self):
     b = BitsArray(8, '\x00')
     b[7] = 1
-    self.assertEqual(b.int(), 128)
+    self.assertEqual(int(b), 128)
 
   def BitsArraySlice5_test(self):
     b = BitsArray(8, '\x00')
     b[0] = 1
     b[7] = 1
-    self.assertEqual(b.int(), 129)
+    self.assertEqual(int(b), 129)
 
   def BitsArraySlice6_test(self):
     b = BitsArray(16, '\x41\x89')
@@ -154,13 +159,13 @@ class BitsArrayTest(unittest.TestCase):
   def BitsArrayCasting1_test(self):
     b = BitsArray(12, endian='<')
     b[0] = 1
-    self.assertEqual(b.int(), 1)
+    self.assertEqual(int(b), 1)
 
   def BitsArrayCasting2_test(self):
     b = BitsArray(12, endian='<')
     b[11] = 1
     self.assertEqual(b.binary, '\x00\x08')
-    self.assertEqual(b.int(), 2048)
+    self.assertEqual(int(b), 2048)
 
   def BitsArrayCasting3_test(self):
     b = BitsArray(20, endian='<')

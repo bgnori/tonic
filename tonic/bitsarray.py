@@ -35,7 +35,7 @@ class BitsArray(object):
   def __len__(self):
     return self.size
 
-  def int(self):
+  def __int__(self):
     ret = 0
     mask = 1
     for bit in self:
@@ -43,6 +43,12 @@ class BitsArray(object):
         ret |= mask
       mask = mask << 1
     return ret
+
+  def set_shiftable(self, value, begin, end):
+    d = value
+    for n in range(begin, end):
+      d, m = divmod(d, 2)
+      self[n] = m
 
   def _getbyte(self, pos_of_byte):
     return struct.unpack(self.struct_format, self.binary[pos_of_byte])[0]
