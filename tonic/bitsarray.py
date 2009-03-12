@@ -44,6 +44,9 @@ class BitsArray(object):
       mask = mask << 1
     return ret
 
+  def __nonzero__(self):
+    return int(self)
+
   def set_shiftable(self, value, begin, end):
     d = value
     for n in range(begin, end):

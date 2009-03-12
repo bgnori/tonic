@@ -156,18 +156,28 @@ class BitsArrayTest(unittest.TestCase):
     b[0] = 1
     self.assertEqual(b.binary, '\x01\x00')
 
-  def BitsArrayCasting1_test(self):
+  def BitsArrayCastingBool_1_test(self):
+    b = BitsArray(12, endian='<')
+    b[0] = 0
+    self.assertFalse(bool(b))
+
+  def BitsArrayCastingBool_2_test(self):
+    b = BitsArray(12, endian='<')
+    b[0] = 1
+    self.assert_(bool(b))
+
+  def BitsArrayCastingInt_1_test(self):
     b = BitsArray(12, endian='<')
     b[0] = 1
     self.assertEqual(int(b), 1)
 
-  def BitsArrayCasting2_test(self):
+  def BitsArrayCastingInt_2_test(self):
     b = BitsArray(12, endian='<')
     b[11] = 1
     self.assertEqual(b.binary, '\x00\x08')
     self.assertEqual(int(b), 2048)
 
-  def BitsArrayCasting3_test(self):
+  def BitsArrayCastingInt3_test(self):
     b = BitsArray(20, endian='<')
     self.assertEqual(b.binary, '\x00\x00\x00')
     b[0] = 1
