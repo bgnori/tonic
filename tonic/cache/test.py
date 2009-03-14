@@ -21,7 +21,7 @@ class NullTest(unittest.TestCase):
     hub.connect(Null())
 
   def tearDown(self):
-    pass
+    hub.close()
     
   def test_HelloWorld(self):
     hw = 'Hello World!'
@@ -38,6 +38,16 @@ class NullTest(unittest.TestCase):
     except NotInCache:
       pass
 
+  def test_purge(self):
+    hw = 'Hello World!'
+    hub.set('test1', hw)
+    hub.purge()
+    try:
+      value = hub.get('test1')
+      self.assert_(False)
+    except NotInCache:
+      pass
+
 
 class DictTest(unittest.TestCase):
   def setUp(self):
@@ -45,7 +55,7 @@ class DictTest(unittest.TestCase):
     hub.connect(Dict())
 
   def tearDown(self):
-    pass
+    hub.close()
     
   def test_HelloWorld(self):
     hw = 'Hello World!'
@@ -55,6 +65,16 @@ class DictTest(unittest.TestCase):
     value = hub.get('test1')
     self.assert_(now - mtime < 1.0) #disk acess is so slow.
     self.assertEqual(value, hw)
+
+  def test_purge(self):
+    hw = 'Hello World!'
+    hub.set('test1', hw)
+    hub.purge()
+    try:
+      value = hub.get('test1')
+      self.assert_(False)
+    except NotInCache:
+      pass
 
 
 class MemcacheTestingServerTest(unittest.TestCase):
@@ -96,6 +116,30 @@ class MemcacheTest(unittest.TestCase):
     self.assertAlmostEqual(now, mtime, 2)
     self.assertEqual(value, hw)
 
+  def test_purge(self):
+    hw = 'Hello World!'
+    hub.set('test1', hw)
+    hub.purge()
+    try:
+      value = hub.get('test1')
+      self.assert_(False)
+    except NotInCache:
+      pass
+
+  def test_mtime(self):
+    hw = 'Hello World!'
+    zero = 0.0 #time.ctime(0)
+    hub.set('test1', hw, mtime=zero)
+    mtime = hub.mtime('test1')
+    value = hub.get('test1')
+    self.assert_(zero - mtime < 1.0) #disk acess is so slow.
+    self.assertEqual(value, hw)
+
+    try:
+      value = hub.mtime('test2')
+    except NotInCache:
+      pass
+
 
 class DiskTest(unittest.TestCase):
   def setUp(self):
@@ -103,7 +147,7 @@ class DiskTest(unittest.TestCase):
     hub.connect(Disk(workdir=tempfile.mkdtemp()))
 
   def tearDown(self):
-    pass
+    hub.close()
     
   def test_HelloWorld(self):
     hw = 'Hello World!'
@@ -114,6 +158,29 @@ class DiskTest(unittest.TestCase):
     self.assert_(now - mtime < 1.0) #disk acess is so slow.
     self.assertEqual(value, hw)
 
+  def test_purge(self):
+    hw = 'Hello World!'
+    hub.set('test1', hw)
+    hub.purge()
+    try:
+      value = hub.get('test1')
+      self.assert_(False)
+    except NotInCache:
+      pass
+
+  def test_mtime(self):
+    hw = 'Hello World!'
+    zero = 0.0 #time.ctime(0)
+    hub.set('test1', hw, mtime=zero)
+    mtime = hub.mtime('test1')
+    value = hub.get('test1')
+    self.assert_(zero - mtime < 1.0) #disk acess is so slow.
+    self.assertEqual(value, hw)
+
+    try:
+      value = hub.mtime('test2')
+    except NotInCache:
+      pass
 
 class FileTest(unittest.TestCase):
   def setUp(self):
@@ -121,7 +188,7 @@ class FileTest(unittest.TestCase):
     hub.connect(File(workdir=tempfile.mkdtemp()))
 
   def tearDown(self):
-    pass
+    hub.close()
     
   def test_HelloWorld(self):
     hw = 'Hello World!'
@@ -131,6 +198,30 @@ class FileTest(unittest.TestCase):
     value = hub.get('README')
     self.assert_(now - mtime < 1.0) #disk acess is so slow.
     self.assertEqual(value, hw)
+
+  def test_purge(self):
+    hw = 'Hello World!'
+    hub.set('test1', hw)
+    hub.purge()
+    try:
+      value = hub.get('test1')
+      self.assert_(False)
+    except NotInCache:
+      pass
+
+  def test_mtime(self):
+    hw = 'Hello World!'
+    zero = 0.0 #time.ctime(0)
+    hub.set('test1', hw, mtime=zero)
+    mtime = hub.mtime('test1')
+    value = hub.get('test1')
+    self.assert_(zero - mtime < 1.0) #disk acess is so slow.
+    self.assertEqual(value, hw)
+
+    try:
+      value = hub.mtime('test2')
+    except NotInCache:
+      pass
 
 
 class HierachyTest(unittest.TestCase):
@@ -149,6 +240,30 @@ class HierachyTest(unittest.TestCase):
     value = hub.get('test1')
     self.assert_(now - mtime < 1.0) 
     self.assertEqual(value, hw)
+
+  def test_purge(self):
+    hw = 'Hello World!'
+    hub.set('test1', hw)
+    hub.purge()
+    try:
+      value = hub.get('test1')
+      self.assert_(False)
+    except NotInCache:
+      pass
+
+  def test_mtime(self):
+    hw = 'Hello World!'
+    zero = 0.0 #time.ctime(0)
+    hub.set('test1', hw, mtime=zero)
+    mtime = hub.mtime('test1')
+    value = hub.get('test1')
+    self.assert_(zero - mtime < 1.0) #disk acess is so slow.
+    self.assertEqual(value, hw)
+
+    try:
+      value = hub.mtime('test2')
+    except NotInCache:
+      pass
 
 
 class MemoizeTest(unittest.TestCase):

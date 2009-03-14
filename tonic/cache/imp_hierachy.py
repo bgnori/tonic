@@ -12,6 +12,10 @@ class Storage(tonic.cache.HashableKeyStorage):
   def __init__(self, levels, *args, **kws):
     self.levels = levels
 
+  def purge(self):
+    for storage in self.levels:
+      storage.purge()
+
   def bringUpFrom(self, nth, key):
     if nth > 0:
       self.levels[nth - 1].set(

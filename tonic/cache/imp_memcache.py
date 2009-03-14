@@ -25,7 +25,8 @@ class Storage(tonic.cache.StringKeyStorage):
     return str(hash(key))
 
   def purge(self):
-    pass
+    self.client.flush_all()
+    #print dir(self.client)
 
   def close(self):
     pass

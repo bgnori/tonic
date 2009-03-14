@@ -26,7 +26,6 @@ class Storage(tonic.cache.Storage):
 
   def _path(self, key):
     assert os.path.exists(self.workdir)
-    assert os.path.exists(key)
     return os.path.join(self.workdir, key[1:]) 
     #remove /
     #FIXME:  it works only on UNIX.

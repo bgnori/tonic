@@ -15,16 +15,11 @@ class NotInCache(Exception):
 class VirtualMethod(Exception):
   pass
 
+
 class Storage(object):
-  def purge(self):
-    raise VirtualMethod
-
-  def close(self):
-    raise VirtualMethod
-
-  def checkkeytype(self, key):
-    pass
-
+  def purge(self):raise VirtualMethod
+  def close(self):raise VirtualMethod
+  def checkkeytype(self, key):pass
   def set(self, key, value, mtime=None):
     self.checkkeytype(key)
     self._set(key, value, mtime)
@@ -50,7 +45,6 @@ class Storage(object):
 
   def _mtime(self, key):
     raise VirtualMethod
-
 
 class HashableKeyStorage(Storage):
   def checkkeytype(self, key):
@@ -102,8 +96,8 @@ class Hub(object):
     return self.storage.get(key)
   def mtime(self, key):
     return self.storage.mtime(key)
-  def set(self, value, mtime=None):
-    self.storage.set(value, mtime)
+  def set(self, key, value, mtime=None):
+    self.storage.set(key, value, mtime)
   def connect(self, storage):
     assert isinstance(storage, Storage)
     self.storage = storage
