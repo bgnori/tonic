@@ -80,6 +80,12 @@ class Item(tonic.feedhelper.mailingbot.Item):
     self._imp = uhtml 
     self._bot = bot
 
+  def get_timestamp(self):
+    pass
+
+  def mark_as_sent(self, t):
+    pass
+
   def mailsubject(self):
     p = Parser()
     p.feed(self._imp)

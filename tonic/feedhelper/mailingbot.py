@@ -28,8 +28,11 @@ class Item(object):
   def sendP(self):
     return True
 
-  def mark_as_sent(self):
-    pass
+  def get_timestamp(self):
+    return dt.now()
+    
+  def mark_as_sent(self, t):
+    assert isinstance(t, dt)
 
   def make_message(self, bot):
     msg = MIMEText(self.mailbody().encode('utf-8'), 'plain', 'utf-8')
@@ -49,7 +52,8 @@ class Bot(object):
     self.depot = kw
 
   def __getattr__(self, name):
-    assert name in ("feed_url", "bot_addr", 
+    assert name in ("subject_prefix",
+                    "feed_url", "bot_addr", 
                     "sender_addr", "password", 
                     "grp_addr", "server",
                     "last",), '%s is not in list'%name
@@ -73,7 +77,7 @@ class Bot(object):
         if item.sendP():
           msg = item.make_message(self)
           con.sendmail(self.sender_addr, self.grp_addr, msg.as_string())
-          item.mark_as_sent()
+          item.mark_as_sent(self.get_timestamp())
           c += 1
           self.write('.')
     finally:

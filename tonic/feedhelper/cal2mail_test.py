@@ -14,6 +14,7 @@ from tonic.feedhelper.cal2mail import *
 class BotTest(unittest.TestCase):
   def setUp(self):
     self.bot = Bot(
+          subject_prefix='subject_prefix',
           feed_url='feed_url',
           bot_addr='bot_addr',
           sender_addr='sender_addr', 

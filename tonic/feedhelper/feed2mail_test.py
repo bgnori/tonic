@@ -7,11 +7,14 @@
 
 import unittest
 import os
+from datetime import datetime as dt
+
 from tonic.feedhelper.feed2mail import Bot
 
 class BotTest(unittest.TestCase):
   def setUp(self):
     self.bot = Bot(
+          subject_prefix='subject_prefix',
           feed_url='feed_url',
           bot_addr='bot_addr',
           sender_addr='sender_addr', 
@@ -31,6 +34,7 @@ class BotTest(unittest.TestCase):
     feed = self.bot.get("http://www.gammon.jp/jbl-h/modules/news/rss.php")
     print feed
 
+    
   def test_make_message(self):
     container = self.bot.get("http://www.gammon.jp/jbl-h/modules/news/rss.php")
     for item in container:
@@ -41,5 +45,8 @@ class BotTest(unittest.TestCase):
       self.assertEqual(m['From'], 'bot_addr')
       self.assertEqual(m['To'], 'grp_addr')
       self.assertEqual(m['Content-Type'], 'text/plain; charset="utf-8"')
-      
+    self.assert_(isinstance(item.get_timestamp(), dt))
+    self.assert_(item.sendP())
+    item.mark_as_sent(dt.now())
+    self.assertFalse(item.sendP())
 
