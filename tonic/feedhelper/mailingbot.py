@@ -77,7 +77,7 @@ class Bot(object):
         if item.sendP():
           msg = item.make_message(self)
           con.sendmail(self.sender_addr, self.grp_addr, msg.as_string())
-          item.mark_as_sent(self.get_timestamp())
+          item.mark_as_sent(item.get_timestamp())
           c += 1
           self.write('.')
     finally:

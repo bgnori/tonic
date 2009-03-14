@@ -138,4 +138,3 @@ class BotTest(unittest.TestCase):
       self.assert_(str(m['Subject']).startswith('=?utf-8'))
       
 
-
