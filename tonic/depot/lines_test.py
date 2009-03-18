@@ -56,3 +56,17 @@ class LinesTest(unittest.TestCase):
     #p = tonic.depot.cfg.CFGProxy([self.temp.name])
     #self.assertEqual(p.c.port, '54321')
 
+  def repr_test(self):
+    self.assertEqual(repr(self.lines_proxy), (
+        r"""<lines.Proxy for [] of  {'a': {'username': 'bgnori', 'host': 'fibs.com', """
+        r"""'password': 'NULL', 'protocol': 'fibs', 'name': 'bgnori@fibs.com:4321', """
+        r"""'client_name': 'wxPyGammon-alpha-0.1', 'clip_version': '1008', 'port': """
+        r"""'4321'}, 'c': {'username': 'wxpygammon', 'host': 'localhost', 'password': """
+        r"""'boo', 'protocol': 'fibs', 'name': 'wxpygammon@localhost:4321', 'client_name': """
+        r"""'wxPyGammon-alpha-0.1', 'clip_version': '1008', 'port': '4321'}, 'b': """
+        r"""{'username': 'wxpygammon', 'host': 'fibs.com', 'password': 'hogehoge', """
+        r"""'protocol': 'fibs', 'name': 'wxpygammon@fibs.com:4321', 'client_name': """
+        r"""'wxPyGammon-alpha-0.1', 'clip_version': '1008', 'port': '4321'}, 'logging': """
+        r"""{'format': "'%(asctime)s", 'filename': './wxPyGammon.log', 'filemode': 'w', """
+        r"""'level': '10'}, 'CommandDebugger': {'show': 'True'}}>"""))
+

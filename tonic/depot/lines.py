@@ -40,7 +40,7 @@ def CRLFProxy(filename):
         d.update({x[1]: e})
         config.update({x[0]: d})
       else:
-        break
+        continue
   finally:
     f.close()
 

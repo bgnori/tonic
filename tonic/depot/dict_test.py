@@ -9,7 +9,7 @@ import tempfile
 import unittest
 import nose
 
-import tonic.depot.dict
+from tonic.depot.dict import Proxy
 
 class DictTest(unittest.TestCase):
   def setUp(self):
@@ -26,12 +26,18 @@ class DictTest(unittest.TestCase):
   def tearDown(self):
     pass
 
-  def test(self):
-    self.assertEqual(proxy.hoge, 'hoge')
-    self.assertEqual(proxy.piyo, 'piyo')
-    self.assertEqual(proxy.one, 1)
-    self.assertEqual(proxy.double.child, 'this is a child')
-    self.assertEqual(proxy.triple.double.child,
+  def test_attr(self):
+    self.assertEqual(self.proxy.hoge, 'hoge')
+    self.assertEqual(self.proxy.piyo, 'piyo')
+    self.assertEqual(self.proxy.one, 1)
+
+  def test_attr_nested(self):
+    self.assertEqual(self.proxy.double.child, 'this is a child')
+    self.assertEqual(self.proxy.triple.double.child,
                      'this is a grand child')
+
+  def test_repr(self):
+    self.assertEqual(repr(self.proxy),
+    """<dict.Proxy for [] of  {'double': {'child': 'this is a child'}, 'hoge': 'hoge', 'piyo': 'piyo', 'triple': {'double': {'child': 'this is a grand child'}}, 'one': 1}>""")
 
 
