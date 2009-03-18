@@ -30,5 +30,5 @@ class DictProxy(tonic.depot.Proxy):
 
 def Proxy(**kw):
   impl = dict(kw)
-  return DictProxy(DictProxy, impl, [])
+  return DictProxy(impl, [])
 

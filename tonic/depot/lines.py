@@ -5,10 +5,9 @@
 # Copyright 2006-2008 Noriyuki Hosaka nori@backgammon.gr.jp
 #
 
-
 import tonic.depot
 
-class Proxy(tonic.depot.Proxy):
+class CRLFProxy(tonic.depot.Proxy):
   def __repr__(self):
     return "<lines.Proxy for %s of  %s>"%(self._apth, str(self._impl))
 
@@ -25,7 +24,7 @@ class Proxy(tonic.depot.Proxy):
     return self._impl[self._apth[0]][x]
 
 
-def CRLFProxy(filename):
+def Proxy(filename):
   config  = dict()
   f = file(filename)
   try:
@@ -44,6 +43,6 @@ def CRLFProxy(filename):
   finally:
     f.close()
 
-  return Proxy(Proxy, config, [])
+  return CRLFProxy(config, [])
 
 

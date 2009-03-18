@@ -8,7 +8,7 @@ import ConfigParser
 
 import tonic.depot
 
-class Proxy(tonic.depot.Proxy):
+class CFGProxy(tonic.depot.Proxy):
   def __repr__(self):
     return "<cfg.Proxy for %s of  %s>"%(self._apth, str(self._impl))
 
@@ -29,31 +29,17 @@ class Proxy(tonic.depot.Proxy):
     self._impl.set(self._apth[0], x, value)
 
   def __iter__(self):
+    assert len(self._apth) in (0, 1)
     if not self._apth:
       for section in self._impl.sections():
         yield self[section]
-    elif len(self._apth) == 1:
+    else:
       section = self._apth[0]
       for option in self._impl.options(section):
         yield self._impl.get(section, option)
-      #for item in self._impl.items(section):
-      #  yield item
-    else:
-      raise
 
 
-def CFGProxy(filenames):
+def Proxy(filenames):
   config = ConfigParser.SafeConfigParser()
   config.read(filenames)
-  return  Proxy(Proxy, config, [])
-
-def write(proxy, filename):
-  f = file(filename, 'w+r')
-  if f:
-    try:
-      proxy._impl.write(f)
-      return True
-    finally:
-      f.close()
-  return False
-
+  return CFGProxy(config, [])

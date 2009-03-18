@@ -9,15 +9,13 @@ How to access is defined in class Proxy of this file.
 
 What to access
   .cfg file access is implemented in cfg.py
-  xml file access is implemented in xml.py
-  csv file access is implemented in csv.py
-
+  .xml file access is implemented in xml.py
+  .csv file access is implemented in csv.py
 '''
 
 class Proxy(object):
-  def __init__(self, cls, impl, access_path):
+  def __init__(self, impl, access_path):
     assert(isinstance(access_path, list))
-    self.__dict__['_cls'] = cls
     self.__dict__['_impl'] = impl
     self.__dict__['_apth'] = access_path
   # MUST
@@ -43,7 +41,7 @@ class Proxy(object):
 
   def _get_node_(self, x):
     assert(self._has_child_(x))
-    return self._cls(self._cls, self._impl, self._apth+[x])
+    return self.__class__(self._impl, self._apth+[x])
     
   def _write_back_(self):
     pass
@@ -109,3 +107,12 @@ class Proxy(object):
 
   def __eq__(self, x):
     return id(self) == id(x)
+
+def dump(proxy, filename):
+  f = file(filename, 'w+r')
+  if f:
+    try:
+      proxy._impl.write(f)
+    finally:
+      f.close()
+

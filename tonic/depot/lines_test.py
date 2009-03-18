@@ -14,14 +14,14 @@ import tonic.depot.lines
 class LinesTest(unittest.TestCase):
   def setUp(self):
     self.temp = tempfile.NamedTemporaryFile()
-    self.lines_proxy = tonic.depot.lines.CRLFProxy('./tonic/depot/lines_test.txt')
+    self.lines_proxy = tonic.depot.lines.Proxy('./tonic/depot/lines_test.txt')
 
   def tearDown(self):
     pass
 
   def creation_test(self):
     self.assertNotEqual(self.lines_proxy, None)
-    self.assert_(isinstance(self.lines_proxy, tonic.depot.lines.Proxy))
+    self.assert_(isinstance(self.lines_proxy, tonic.depot.lines.CRLFProxy))
 
   def secion_test(self):
     self.assert_('logging' in self.lines_proxy)

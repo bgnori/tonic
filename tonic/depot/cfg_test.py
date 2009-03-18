@@ -14,14 +14,13 @@ import tonic.depot.cfg
 class CFGTest(unittest.TestCase):
   def setUp(self):
     self.temp = tempfile.NamedTemporaryFile()
-    self.cfg_proxy = tonic.depot.cfg.CFGProxy(['./tonic/depot/cfg_test.cfg'])
+    self.cfg_proxy = tonic.depot.cfg.Proxy(['./tonic/depot/cfg_test.cfg'])
 
   def tearDown(self):
     pass
 
   def creation_test(self):
     self.assertNotEqual(self.cfg_proxy, None)
-    self.assert_(isinstance(self.cfg_proxy, tonic.depot.cfg.Proxy))
 
   def secion_test(self):
     self.assert_( hasattr(self.cfg_proxy, 'logging'))
@@ -50,8 +49,23 @@ class CFGTest(unittest.TestCase):
     c.port = '54321'
     self.assertEqual(c.port, '54321')
 
-    tonic.depot.cfg.write(self.cfg_proxy, self.temp.name)
+    tonic.depot.dump(self.cfg_proxy, self.temp.name)
 
-    p = tonic.depot.cfg.CFGProxy([self.temp.name])
+    p = tonic.depot.cfg.Proxy([self.temp.name])
     self.assertEqual(p.c.port, '54321')
+
+  def repr_test(self):
+    print self.cfg_proxy
+
+  def bad_write_test(self):
+    try:
+      tonic.depot.dump(self.cfg_proxy, '/')
+      self.assert_(False)
+    except IOError:
+      pass
+
+  def iter_test(self):
+    for i in self.cfg_proxy:
+      for j in i:
+        pass
 
