@@ -60,30 +60,3 @@ class HistoryListWithDiffSelection(Form):
     </table>
     </form>
     """
-
-if __name__ == '__main__':
-  from tonic.funny import LooseQuacker as ChangeMock
-  from tonic.funny import LooseQuacker as UserMock
-  from turbogears.view import load_engines
-  load_engines()
-  editor = UserMock(
-               display_name='nori',
-               )
-  history=[
-            ChangeMock(id=1,
-                       last_modified='1001 10 10',
-                       editor=editor,
-                       after='after',
-                       before='before',
-                       wikiname='FrontPage',
-                       ),
-            ChangeMock(id=2,
-                       last_modified='1111 11 11',
-                       editor=editor,
-                       after='after2',
-                       before='before2',
-                       wikiname='FrontPage',
-                      ),
-            ]
-  hw = HistoryListWithDiffSelection(history=history)
-  print hw.render()
