@@ -54,8 +54,12 @@ setup(
   long_description=LONG_DESCRIPTION,
   package_dir={'tonic':'tonic', }, #root
   packages=['tonic',
-            'tonic.turbogears',
             'tonic.cache',
+            'tonic.depot',
+            'tonic.feedhelper',
+            'tonic.markups',
+            'tonic.specedit',
+            'tonic.tg',
            ],
   package_data = {},
   py_modules=[
