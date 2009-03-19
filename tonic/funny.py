@@ -22,19 +22,3 @@ class LooseQuacker(object):
   def __setattr__(self, name, value):
     self.__dict__.update({name:value})
 
-if __name__ == '__main__':
-  """
-    Monty Python's Meaning Of Life(1983)
-  """
-  fish = LooseQuacker(greetings='Good morning!')
-  tank = dict(TerryJones=fish,
-              TerenceGilliam=fish,
-              GrahamChapman=fish,
-              JohnCleese=fish,
-              EricIdle=fish,
-              MichaelPalin=fish
-              )
-
-  for name, fish in tank.items():
-    print name,':',  fish.greetings
-
