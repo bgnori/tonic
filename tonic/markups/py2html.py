@@ -75,9 +75,9 @@ class Formatter(LineParser):
     
   def codeblock(self):
     self.write('<pre class="codeblock">')
-    for line in self.instream:
+    for line in self.instream: 
       if not self.parse(line):
-        self.write('<code>' + escape(line.strip('\n')) + '</code>\n')
+        self.write('<code>' + escape(line) + '</code>\n')
     self.write('</pre>')
 
   def doctype(self):
