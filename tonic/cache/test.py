@@ -110,15 +110,17 @@ class MemcacheTest(unittest.TestCase):
   def test_HelloWorld(self):
     hw = 'Hello World!'
     hub.set('test1', hw)
+    time.sleep(0.01) #wait for cache to be written
     value = hub.get('test1')
     mtime = hub.mtime('test1')
     now = time.time()
-    self.assertAlmostEqual(now, mtime, 2)
+    self.assertAlmostEqual(now, mtime, 1)
     self.assertEqual(value, hw)
 
   def test_purge(self):
     hw = 'Hello World!'
     hub.set('test1', hw)
+    time.sleep(0.01) #wait for cache to be written
     hub.purge()
     try:
       value = hub.get('test1')
