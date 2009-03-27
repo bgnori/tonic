@@ -6,7 +6,8 @@
 #
 
 __all__ = ['itom', 'mtoi',
-           'IPv4Addr', 'IPv4Mask', 'TCPPort', 'UDPPort',
+           'IPv4Addr', 'IPv4Mask', 
+           'TCPPort', 'UDPPort',
            'Request', 'NetworkInterface', 'Machine', 'Router',
            'DestinationUnreachable',
            'DestinationNotFound',
@@ -33,22 +34,30 @@ def mtoi(m):
   return i
 
 
-class QuadByte(object):
-  __slots__ = ('_value',)
+class QuadByte(str):
   def __new__(cls, v):
     assert isinstance(v, str)
     assert len(v) == 4
-    self = object.__new__(QuadByte)
-    self._value = v
+    self = str.__new__(QuadByte, v)
     return self
 
-  def __and__(self, other):
-    s = socket.ntohl(struct.unpack('<I', self._value)[0])
-    o = socket.ntohl(struct.unpack('<I', other._value)[0])
-    return QuadByte(struct.pack('<I', socket.htonl(s&o)))
+  def __str__(self):
+    return socket.inet_ntop(socket.AF_INET, self)
 
-  def __eq__(self, other):
-    return self._value == other._value
+  def __repr__(self):
+    return '<QuadByte "%s">'%super(QuadByte, self).__str__()
+
+  def _bitop(self, other, op):
+    s = socket.ntohl(struct.unpack('<I', self)[0])
+    o = socket.ntohl(struct.unpack('<I', other)[0])
+    return QuadByte(struct.pack('<I', socket.htonl(op(s, o))))
+
+  def __and__(self, other):
+    return self._bitop(other, int.__and__)
+  def __or__(self, other):
+    return self._bitop(other, int.__or__)
+  def __xor__(self, other):
+    return self._bitop(other, int.__xor__)
 
 
 class IPv4Addr(QuadByte):
@@ -178,6 +187,7 @@ class Router(Machine):
     if super(self).receive(ni, request):
       return True
     for i in self.nis:
+      print i
       if request.addr in i.segment.addr:
         return i.segment.receive(request)
     return True

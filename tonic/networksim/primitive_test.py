@@ -7,8 +7,7 @@
 
 import unittest
 from tonic.networksim import *
-from tonic.networksim.primitive import PortNumber
-
+from tonic.networksim.primitive import PortNumber, QuadByte
 
 class UtilTest(unittest.TestCase):
   def test_itom_0(self):
@@ -31,7 +30,43 @@ class UtilTest(unittest.TestCase):
 
 
 class PrimitiveTest(unittest.TestCase):
-  def test_IPv4Addr_immutalbeness(self):
+  def test_quadbyte_str(self):
+    qb = QuadByte('\x00\x00\x00\x00')
+    self.assertEqual(str(qb), '0.0.0.0')
+
+  def test_quadbyte_repr(self):
+    qb = QuadByte('\x00\x00\x00\x00')
+    self.assertEqual(repr(qb), '<QuadByte "\x00\x00\x00\x00">')
+
+  def test_quadbyte_immutableness(self):
+    hash(QuadByte('\x00\x00\x00\x00'))
+
+  def test_quadbyte_eq(self):
+    a = QuadByte('\x00\x00\x00\x00')
+    b = QuadByte('\x00\x00\x00\x00')
+    self.assert_(a == b)
+
+  def test_quadbyte_not_eq(self):
+    a = QuadByte('\x00\x00\x00\x00')
+    b = QuadByte('\xf0\x00\x00\x00')
+    self.assert_(a != b)
+
+  def test_quadbyte_and(self):
+    a = QuadByte('\xff\x00\x00\x00')
+    b = QuadByte('\xf0\xf0\x00\x00')
+    self.assertEqual(a & b, QuadByte('\xf0\x00\x00\x00'))
+
+  def test_quadbyte_or(self):
+    a = QuadByte('\xff\x00\x00\x00')
+    b = QuadByte('\xf0\xf0\x00\x00')
+    self.assertEqual(a | b, QuadByte('\xff\xf0\x00\x00'))
+
+  def test_quadbyte_or(self):
+    a = QuadByte('\xff\x00\x00\x00')
+    b = QuadByte('\xf0\xf0\x00\x00')
+    self.assertEqual(a ^ b, QuadByte('\x0f\xf0\x00\x00'))
+
+  def test_IPv4Addr_immutableness(self):
     hash(IPv4Addr('192.168.0.1'))
     
   def test_ip_singular(self):
@@ -39,9 +74,9 @@ class PrimitiveTest(unittest.TestCase):
     two = IPv4Addr('192.168.0.1')
     self.assertEqual(id(one), id(two))
     
-  def test_IPvMask_str_immutalbeness(self):
+  def test_IPvMask_str_immutableness(self):
     hash(IPv4Mask('255.255.0.0'))
-  def test_IPvMask_int_immutalbeness(self):
+  def test_IPvMask_int_immutableness(self):
     hash(IPv4Mask(16))
 
   def test_PortNumber_validrange(self):
