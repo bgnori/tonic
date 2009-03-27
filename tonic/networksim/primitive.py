@@ -8,7 +8,7 @@
 __all__ = ['itom', 'mtoi',
            'IPv4Addr', 'IPv4Mask', 
            'TCPPort', 'UDPPort',
-           'Request', 'NetworkInterface', 'Machine', 'Router',
+           'Packet', 'NetworkInterface', 'Machine', 'Router',
            'DestinationUnreachable',
            'DestinationNotFound',
            'Segment', 'Network']
@@ -84,113 +84,148 @@ class IPv4Mask(QuadByte):
 
 class PortNumber(int):
   'immutable'
-  __slots__ = ('_number')
   def __new__(cls, number):
     if not isinstance(number, int):
       raise TypeError
     if number < 0 or number > 65535:
       raise ValueError
-    #self = object.__new__(cls) is not safe, since int is embeded type.
-    self = int.__new__(PortNumber)
-    self._number = number
+    self = int.__new__(PortNumber, number)
     return self
 
 class UDPPort(PortNumber):pass
 class TCPPort(PortNumber):pass
 
 
-class Request(object):
+class Packet(object):
   def __init__(self, src, dest, port=None):
     self.src = src
     self.dest = dest
     self.port = port
     self._hops = []
-  def hop(self, ni):
-    self._hops.append(ni)
 
 
 class DestinationUnreachable(Exception):pass
 class DestinationNotFound(Exception):pass
 
 
-class Segment(object):
+class Network(object):
+  def __init__(self):
+    self.pots = []
+  def add(self, pot):
+    self.pots.append(pot)
+  def tick(self):
+    for pot in self.pots:
+      pot.on_tick()
+  def verify(self):
+    pass
+  def make_segment(self, addr, mask):
+    seg = Segment(addr, mask)
+    self.add(seg)
+    return seg
+
+  def make_interface(self, seg, machine, addr, mask, *args, **kw):
+    ni = NetworkInterface(seg, machine, addr, mask, *args, **kw)
+    self.add(ni)
+    seg.add(ni)
+    machine.add(ni)
+    return ni
+    
+
+class Pot(object):
+  def __init__(self):
+    self.packets = []
+
+  def on_tick(self):
+    if not self.packets:
+      return
+    p = self.packets.pop()
+    self.handle(p)
+
+  def receive(self, packet):
+    self.packets.append(packet)
+
+  def handle(self, p):
+    pass
+
+
+class Segment(Pot):
   def __init__(self, addr, mask):
+    super(Segment, self).__init__()
     self.addr = addr
     self.mask = mask
     self.nis = []
 
-  def connect(self, ni):
+  def add(self, ni):
     self.nis.append(ni)
-    ni.set_segment(self)
 
-  def receive(self, request):
-    found = False
-    for ni in self.nis:
-      found |= ni.receive(request) #FIXME stack may be too deep
-    if not found:
-      raise DestinationNotFound
+  def handle(self, packet):
+    '''dumb hub model'''
+    for ni in self.nis: 
+      ni.receive(packet)
 
   def __contains__(self, addr):
     return (self.addr & self.mask) == (addr & self.mask)
 
 
-class Uplink(Segment):
+class Uplink(Pot):
   def __init__(self):
+    super(Uplink, self).__init__()
     self.nis = []
 
 
-class NetworkInterface(object):
-  def __init__(self, owner, addr, mask, *args, **kws):
+class NetworkInterface(Pot):
+  def __init__(self, seg, owner, addr, mask, *args, **kws):
+    super(NetworkInterface, self).__init__()
+    self.segment = seg
     self.owner = owner
     self.addr = addr
-    self.segment = None
+    self.mask = mask
 
-  def set_segment(self, segment):
-    self.segment = segment
+  def __repr__(self):
+    return '<NetworkInterface addr=%s/mask=%s>'%(self.addr, self.mask)
 
-  def receive(self, request):
-    if request.dest == self.addr:
+  def handle(self, packet):
+    if packet.dest == self.addr:
       if self.owner:
-        return self.owner.receive(self, request)
-      return True
-    return False
+        self.owner.receive(self, packet)
+
+  def send(self, packet):
+    self.segment.receive(packet)
 
 
-class Network(object):
-  def __init__(self, **kws):
-    self.__dict__.update(kws)
-
-  #def __getattr__(self, name):
-
-  def verify(self):
+class Consumer(object):
+  def consume(self, packet):
     pass
 
-
-class Machine(object):
+class Machine(Consumer):
   def __init__(self):
+    super(Machine, self).__init__()
     self.nis = []
 
-  def make_interface(self, addr, mask, *args, **kw):
-    ni = NetworkInterface(self, addr, mask, *args, **kw)
+  def add(self, ni):
     self.nis.append(ni)
-    return ni
 
-  def receive(self, ni, request):
-    return request.dest == ni.addr
+  def receive(self, ni, packet):
+    assert packet.dest == ni.addr
+    self.consume(packet)
+
 
 class Router(Machine):
   def __init__(self):
     super(Router, self).__init__()
     self.routes = {}
 
-  def receive(self, ni, request):
-    if super(self).receive(ni, request):
-      return True
+  def receive(self, ni, packet):
+    '''\
+    very dumb routing. 
+    Able to handle single hop only.
+    '''
     for i in self.nis:
-      print i
-      if request.addr in i.segment.addr:
-        return i.segment.receive(request)
-    return True
+      if packet.dest in i.segment.addr:
+        i.segment.receive(packet)
+        return
+    self.consume(packet)
+
 
 class VirtualMachine(Machine):
   pass

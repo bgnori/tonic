@@ -107,24 +107,38 @@ class PrimitiveTest(unittest.TestCase):
   def test_TCPPort_immutableness(self):
     hash(TCPPort(0))
 
-  def test_request(self):
-    r = Request(IPv4Addr('192.168.0.2'), IPv4Addr('192.168.0.1'))
+  def test_packet(self):
+    p = Packet(IPv4Addr('192.168.0.2'), IPv4Addr('192.168.0.1'))
+
+
+class NetworkManagedObjectTest(unittest.TestCase):
+  def setUp(self):
+    self.nw = Network()
+    self.seg = self.nw.make_segment(IPv4Addr('192.168.0.0'), IPv4Mask(24))
 
   def test_nwif(self):
     m = Machine()
-    nwif = m.make_interface(IPv4Addr('192.168.0.1'), IPv4Mask(24))
+    nwif = self.nw.make_interface(
+        self.seg, m,
+        IPv4Addr('192.168.0.1'), IPv4Mask(24))
 
   def test_nwif_receive_accept(self):
     m = Machine()
-    nwif = m.make_interface(IPv4Addr('192.168.0.1'), IPv4Mask(24))
-    r = Request(IPv4Addr('192.168.0.2'), IPv4Addr('192.168.0.1'))
-    self.assert_(nwif.receive(r))
+    nwif = self.nw.make_interface(
+        self.seg, m,
+        IPv4Addr('192.168.0.1'), IPv4Mask(24))
+    p = Packet(IPv4Addr('192.168.0.2'), IPv4Addr('192.168.0.1'))
+    nwif.receive(p)
+    self.nw.tick()
 
   def test_nwif_receive_ignore(self):
     m = Machine()
-    nwif = m.make_interface(IPv4Addr('192.168.0.1'), IPv4Mask(24))
-    r = Request(IPv4Addr('192.168.0.1'), IPv4Addr('192.168.0.2'))
-    self.assert_(not nwif.receive(r))
+    nwif = self.nw.make_interface(
+        self.seg, m,
+        IPv4Addr('192.168.0.1'), IPv4Mask(24))
+    p = Packet(IPv4Addr('192.168.0.1'), IPv4Addr('192.168.0.2'))
+    nwif.receive(p)
+    self.nw.tick()
 
   def test_router(self):
     r = Router()
@@ -132,60 +146,79 @@ class PrimitiveTest(unittest.TestCase):
 
 class SimpleSegmentTest(unittest.TestCase):
   def setUp(self):
-    m1 = Machine()
-    m2 = Machine()
-    self.nw = Segment(IPv4Addr('192.168.0.0'), IPv4Mask(24))
-    self.nw.connect(m1.make_interface(IPv4Addr('192.168.0.1'), IPv4Mask(24)))
-    self.nw.connect(m2.make_interface(IPv4Addr('192.168.0.2'), IPv4Mask(24)))
+    self.nw = Network()
+    self.m1 = Machine()
+    self.m2 = Machine()
+    self.seg = self.nw.make_segment(IPv4Addr('192.168.0.0'), IPv4Mask(24))
+    self.nw.make_interface(self.seg, self.m1,
+              IPv4Addr('192.168.0.1'), IPv4Mask(24))
+    self.nw.make_interface(self.seg, self.m2,
+              IPv4Addr('192.168.0.2'), IPv4Mask(24))
 
   def test_in(self):
-    self.assert_(IPv4Addr('192.168.0.1') in self.nw)
+    self.assert_(IPv4Addr('192.168.0.1') in self.seg)
 
   def test_not_in(self):
-    self.assert_(IPv4Addr('192.192.0.1') not in self.nw)
+    self.assert_(IPv4Addr('192.192.0.1') not in self.seg)
 
   def test_send(self):
-    r = Request(IPv4Addr('192.168.0.1'), IPv4Addr('192.168.0.2'))
-    self.nw.receive(r)
+    p = Packet(IPv4Addr('192.168.0.1'), IPv4Addr('192.168.0.2'))
+    self.m1.nis[0].send(p)
+    self.assert_(self.seg.packets)
+    self.nw.tick()
+    self.assert_(not self.seg.packets)
+    self.assert_(self.m2.nis[0].packets)
 
   def test_send_no_receiver(self):
-    r = Request(IPv4Addr('192.168.0.1'), IPv4Addr('192.168.0.3'))
-    try:
-      self.nw.receive(r)
-      self.assert_(False)
-    except DestinationNotFound:
-      pass
+    p = Packet(IPv4Addr('192.168.0.1'), IPv4Addr('192.168.0.3'))
+    self.seg.receive(p)
+    self.assert_(self.seg.packets)
+    self.nw.tick()
+    self.assert_(not self.seg.packets)
+    self.assert_(not self.m2.nis[0].packets)
+    self.assert_(not self.m1.nis[0].packets)
 
 
 class TwoSegmentTest(unittest.TestCase):
   def setUp(self):
-    self.nw = Network(
-                seg0=Segment(IPv4Addr('192.168.0.0'), IPv4Mask(24)),
-                seg1=Segment(IPv4Addr('192.168.1.0'), IPv4Mask(24)),
-                )
-    m0 = Machine()
-    m1 = Machine()
-    r = Router()
-    self.nw.seg0.connect(
-      r.make_interface(IPv4Addr('192.168.0.1'), IPv4Mask(24)))
-    self.nw.seg0.connect(
-      m0.make_interface(IPv4Addr('192.168.0.2'), IPv4Mask(24)))
-    self.nw.seg1.connect(
-      r.make_interface(IPv4Addr('192.168.1.1'), IPv4Mask(24)))
-    self.nw.seg1.connect(
-      m1.make_interface(IPv4Addr('192.168.1.2'), IPv4Mask(24)))
+    self.nw = Network()
+    self.seg0 = self.nw.make_segment(IPv4Addr('192.168.0.0'), IPv4Mask(24))
+    self.seg1 = self.nw.make_segment(IPv4Addr('192.168.1.0'), IPv4Mask(24))
 
-  def test_send(self):
-    r = Request(IPv4Addr('192.168.0.1'), IPv4Addr('192.168.1.2'))
-    self.nw.seg0.receive(r)
+    self.m0 = Machine()
+    self.m1 = Machine()
+    self.r = Router()
+    self.nw.make_interface(
+        self.seg0, self.r,
+        IPv4Addr('192.168.0.1'), IPv4Mask(24))
+    self.nw.make_interface(
+        self.seg0, self.m0,
+        IPv4Addr('192.168.0.2'), IPv4Mask(24))
+
+    self.nw.make_interface(
+        self.seg1, self.r,
+        IPv4Addr('192.168.1.1'), IPv4Mask(24))
+    self.nw.make_interface(
+        self.seg1, self.m1,
+        IPv4Addr('192.168.1.1'), IPv4Mask(24))
+
+  def test_send_within_segment(self):
+    p = Packet(IPv4Addr('192.168.0.2'), IPv4Addr('192.168.0.1'))
+    self.m0.nis[0].send(p)
+
+  def test_send_send_to_router(self):
+    p = Packet(IPv4Addr('192.168.0.1'), IPv4Addr('192.168.0.2'))
+    self.m0.nis[0].send(p)
+
+  def test_send_over_router(self):
+    p = Packet(IPv4Addr('192.168.0.1'), IPv4Addr('192.168.1.2'))
+    self.m0.nis[0].send(p)
 
   def test_send_no_receiver(self):
-    r = Request(IPv4Addr('192.168.0.1'), IPv4Addr('192.168.2.3'))
-    try:
-      self.nw.seg0.receive(r)
-      self.assert_(False)
-    except DestinationNotFound:
-      pass
+    p = Packet(IPv4Addr('192.168.0.1'), IPv4Addr('192.168.2.3'))
+    self.m0.nis[0].send(p)
+    #self.nw.seg0.send(p)
+    #self.assert_(False)
 
 
 class SegmentWithUplinkTest(unittest.TestCase):
@@ -201,6 +234,5 @@ class SegmentWithUplinkTest(unittest.TestCase):
     self.nw.seg.connect(m.make_interface(IPv4Addr('192.168.0.2')))
     self.nw.up.connect(r.make_interface(IPv4Addr('0.0.1.1')))
     self.nw.up.connect(m1.make_interface(IPv4Addr('0.0.1.2')))
-
 
 
