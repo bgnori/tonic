@@ -32,26 +32,42 @@ def mtoi(m):
     i += 1
   return i
 
-class IPv4Addr(object):
-  'singleton and immutable'
-  __slots__ = ('_numeric',)
+
+class QuadByte(object):
+  __slots__ = ('_value',)
+  def __new__(cls, v):
+    assert isinstance(v, str)
+    assert len(v) == 4
+    self = object.__new__(QuadByte)
+    self._value = v
+    return self
+
+  def __and__(self, other):
+    s = socket.ntohl(struct.unpack('<I', self._value)[0])
+    o = socket.ntohl(struct.unpack('<I', other._value)[0])
+    return QuadByte(struct.pack('<I', socket.htonl(s&o)))
+
+  def __eq__(self, other):
+    return self._value == other._value
+
+
+class IPv4Addr(QuadByte):
+  'immutable'
   _bag = {}
   def __new__(cls, presentation):
     if presentation not in cls._bag:
-      self = object.__new__(cls)
-      self._numeric = socket.inet_pton(socket.AF_INET, presentation)
+      self = QuadByte.__new__(cls, socket.inet_pton(socket.AF_INET, presentation))
       cls._bag.update({presentation:self})
     return cls._bag[presentation]
 
-class IPv4Mask(object):
+
+class IPv4Mask(QuadByte):
   'immutable'
-  __slots__ = ('_numeric', '_mask')
   def __new__(cls, mask):
-    self = object.__new__(cls)
     if isinstance(mask, int):
-      self._mask = itom(mask)
+      self = QuadByte.__new__(cls, itom(mask))
     elif isinstance(mask, str):
-      self._mask = socket.inet_pton(socket.AF_INET, mask)
+      self = QuadByte.__new__(cls, socket.inet_pton(socket.AF_INET, mask))
     else:
       raise TypeError
     return self
@@ -89,10 +105,15 @@ class DestinationNotFound(Exception):pass
 
 
 class Segment(object):
-  def __init__(self, *args):
-    self.nis = list(args)
+  def __init__(self, addr, mask):
+    self.addr = addr
+    self.mask = mask
+    self.nis = []
+
   def connect(self, ni):
     self.nis.append(ni)
+    ni.set_segment(self)
+
   def receive(self, request):
     found = False
     for ni in self.nis:
@@ -100,11 +121,23 @@ class Segment(object):
     if not found:
       raise DestinationNotFound
 
+  def __contains__(self, addr):
+    return (self.addr & self.mask) == (addr & self.mask)
+
+
+class Uplink(Segment):
+  def __init__(self):
+    self.nis = []
+
 
 class NetworkInterface(object):
   def __init__(self, owner, addr, mask, *args, **kws):
     self.owner = owner
     self.addr = addr
+    self.segment = None
+
+  def set_segment(self, segment):
+    self.segment = segment
 
   def receive(self, request):
     if request.dest == self.addr:
@@ -113,8 +146,6 @@ class NetworkInterface(object):
       return True
     return False
 
-class Uplink(Segment):
-  pass
 
 class Network(object):
   def __init__(self, **kws):
@@ -126,35 +157,34 @@ class Network(object):
     pass
 
 
-
-
 class Machine(object):
+  def __init__(self):
+    self.nis = []
+
   def make_interface(self, addr, mask, *args, **kw):
     ni = NetworkInterface(self, addr, mask, *args, **kw)
-    self.register(ni)
+    self.nis.append(ni)
     return ni
 
-  def register(self, ni):
-    pass
   def receive(self, ni, request):
-    return True
+    return request.dest == ni.addr
 
 class Router(Machine):
   def __init__(self):
-    self.nis = []
+    super(Router, self).__init__()
     self.routes = {}
 
-  def register(self, ni):
-    self.nis.append(ni)
-    #self.routes = 
-
   def receive(self, ni, request):
+    if super(self).receive(ni, request):
+      return True
+    for i in self.nis:
+      if request.addr in i.segment.addr:
+        return i.segment.receive(request)
     return True
 
 class VirtualMachine(Machine):
   pass
 
 class Service(Machine):pass
-
 
 

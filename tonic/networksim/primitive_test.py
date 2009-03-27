@@ -99,9 +99,15 @@ class SimpleSegmentTest(unittest.TestCase):
   def setUp(self):
     m1 = Machine()
     m2 = Machine()
-    self.nw = Segment()
+    self.nw = Segment(IPv4Addr('192.168.0.0'), IPv4Mask(24))
     self.nw.connect(m1.make_interface(IPv4Addr('192.168.0.1'), IPv4Mask(24)))
     self.nw.connect(m2.make_interface(IPv4Addr('192.168.0.2'), IPv4Mask(24)))
+
+  def test_in(self):
+    self.assert_(IPv4Addr('192.168.0.1') in self.nw)
+
+  def test_not_in(self):
+    self.assert_(IPv4Addr('192.192.0.1') not in self.nw)
 
   def test_send(self):
     r = Request(IPv4Addr('192.168.0.1'), IPv4Addr('192.168.0.2'))
@@ -119,8 +125,8 @@ class SimpleSegmentTest(unittest.TestCase):
 class TwoSegmentTest(unittest.TestCase):
   def setUp(self):
     self.nw = Network(
-                seg0=Segment(),
-                seg1=Segment(),
+                seg0=Segment(IPv4Addr('192.168.0.0'), IPv4Mask(24)),
+                seg1=Segment(IPv4Addr('192.168.1.0'), IPv4Mask(24)),
                 )
     m0 = Machine()
     m1 = Machine()
@@ -150,7 +156,7 @@ class TwoSegmentTest(unittest.TestCase):
 class SegmentWithUplinkTest(unittest.TestCase):
   def setUp(self):
     self.nw = Network(
-                seg=Segment(),
+                seg=Segment(IPv4Addr('192.168.0.0'), IPv4Mask(24)),
                 up=Uplink(),
                 )
     m = Machine()
