@@ -6,4 +6,3 @@
 #
 
 from tonic.bitsarray import BitsArray
-

@@ -8,12 +8,15 @@
 from distutils.core import setup
 import os
 
+from tonic.lastmodified import *
 
 NAME = 'python-tonic-library'
 AUTHOR = "Noriyuki Hosaka", "bgnori@gmail.com",
 VERSION = open("VERSION").read().strip()
 DESCRIPTION = 'collection of small codes. "tonic" library for python'
-LONG_DESCRIPTION="""\
+LONG_DESCRIPTION=\
+'build id is "%s". \n'%(getid('VERSION'),) + \
+"""\
 This package contains:
  * turbogears:
   * cc: decorators for cache-control.
@@ -22,10 +25,14 @@ This package contains:
  * lineparser
   * parsing line oriented data.
 
+ * lastmodified
+  * get git id from path.
+
  * specedit
   * reader/writer for spef file of RPM.
   * It uses elementtree a.k.a xml.etree in python 2.5 or later, for intermediate expression.
   * It uses feature in originally packaged elementtree for testing.
+
  * cache
   * interface/implementation for cache something. 
   * supports
@@ -34,6 +41,7 @@ This package contains:
    * using file (key for get/set must be valid path)
    * using memcache
   * multithread is currently NOT supported
+
 """
 HOMEPAGE = "http://www.tonic-water.com/"
 
@@ -68,6 +76,7 @@ setup(
             'tonic.combination',
             'tonic.visitbus',
             'tonic.bitsarray',
+            'tonic.lastmodified',
   ],
   install_requires = [
     "python>=2.4",

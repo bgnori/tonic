@@ -10,6 +10,8 @@ tonic/lineparser.py
 tonic/lineparser_test.py
 tonic/combination.py
 tonic/combination_test.py
+tonic/lastmodified.py
+tonic/lastmodified_test.py
 tonic/visitbus.py
 tonic/visitbus_test.py
 tonic/depot/__init__.py
