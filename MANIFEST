@@ -2,6 +2,7 @@ setup.cfg
 setup.py
 VERSION
 MANIFEST
+DESCRIPTION
 tonic/__init__.py
 tonic/bitsarray.py
 tonic/bitsarray_test.py
