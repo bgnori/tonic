@@ -15,7 +15,7 @@ AUTHOR = "Noriyuki Hosaka", "bgnori@gmail.com",
 VERSION = open("VERSION").read().strip()
 DESCRIPTION = 'collection of small codes. "tonic" library for python'
 LONG_DESCRIPTION=\
-'build id is "%s". \n'%(getid('VERSION'),) + \
+'build id is "%s". \n'%(onMANIFEST(),) + \
 """\
 This package contains:
  * turbogears:

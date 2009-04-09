@@ -26,8 +26,8 @@ tonic/tg/__init__.py
 tonic/tg/cc.py
 tonic/tg/widgets.py
 tonic/markups/__init__.py
-tonic/markups/py2markups.py
-tonic/markups/py2markups_test.py
+tonic/markups/py2html.py
+tonic/markups/py2html_test.py
 tonic/markups/w3cutil.py
 tonic/markups/w3cutil_test.py
 tonic/specedit/__init__.py

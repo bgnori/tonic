@@ -26,3 +26,25 @@ class Test(unittest.TestCase):
       assert False
     except:
       pass
+
+  def test_mergedid_single(self):
+    s = mergedid('VERSION')
+    print s
+    assert isinstance(s, str)
+
+  def test_mergedid_two(self):
+    s = mergedid('VERSION', 'setup.py')
+    print s
+    assert isinstance(s, str)
+
+  def test_mergedid_mismatch(self):
+    s1 = mergedid('VERSION')
+    s2 = mergedid('VERSION', 'setup.py')
+    assert s1 != s2
+
+  def test_onMANIFEST(self):
+    s = onMANIFEST()
+    print s
+    assert isinstance(s, str)
+
+
