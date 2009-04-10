@@ -24,8 +24,8 @@ This package contains:
  * lineparser
   * parsing line oriented data.
 
- * lastmodified
-  * get git id from path.
+ * moduleid 
+  * calc moduleid based sha1 on content of __file__
 
  * specedit
   * reader/writer for spef file of RPM.
@@ -76,7 +76,7 @@ setup(
             'tonic.combination',
             'tonic.visitbus',
             'tonic.bitsarray',
-            'tonic.lastmodified',
+            'tonic.moduleid',
   ],
   install_requires = [
     "python>=2.4",
