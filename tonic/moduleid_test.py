@@ -26,3 +26,10 @@ class TestRegister(unittest.TestCase):
     register(g)
     self.assert_('__moduleid__' in g)
     
+  def test_glob(self):
+    g = globals()
+    g.update({"__moduleid_deps__": ['tonic/*.py']})
+    register(g)
+    self.assert_('__moduleid__' in g)
+    
+
