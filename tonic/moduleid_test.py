@@ -16,25 +16,25 @@ class TestRegister(unittest.TestCase):
   def tearDown(self):
     pass
   def test_register(self):
-    g = globals()
+    g = dict(globals())
     register(g)
     self.assert_('__moduleid__' in g)
 
   def test_deps(self):
-    g = globals()
+    g = dict(globals())
     g.update({"__moduleid_deps__": ['moduleid_test.py']})
     register(g)
     self.assert_('__moduleid__' in g)
     
   def test_glob_nonemty(self):
-    g = globals()
+    g = dict(globals())
     g.update({"__moduleid_deps__": ['../*.py']})
     register(g)
     self.assert_('__moduleid__' in g)
     
 
   def test_glob_empty(self):
-    g = globals()
+    g = dict(globals())
     g.update({"__moduleid_deps__": ['foobar/*.py']})
     try:
       register(g)
@@ -42,5 +42,10 @@ class TestRegister(unittest.TestCase):
     except ValueError:
       pass
 
+  def test_glob_basedir(self):
+    g = dict(globals())
+    g.update({"__moduleid_deps__": ['*.py']})
+    g.update({"__moduleid_basedir__": '/usr/lib/python2.4/site-packages/'})
+    register(g)
+    self.assert_('__moduleid__' in g)
 
-    

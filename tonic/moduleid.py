@@ -13,7 +13,9 @@ def register(g):
   if path.endswith("pyc") or path.endswith("pyo"):
     path = path[:-1]
   path = os.path.abspath(path)
-  dir = os.path.dirname(path)
+  dir = g.get("__moduleid_basedir__")
+  if dir is None:
+    dir = os.path.dirname(path)
   h = sha.new()
   px = [path] 
   for n in g.get("__moduleid_deps__", []):
@@ -23,7 +25,7 @@ def register(g):
     px.extend(x)
 
   for p in px:
-    f = open(p, 'r+b') 
+    f = open(p, 'rb') 
     try:
       for read in f.read():
         h.update(read)
