@@ -8,18 +8,14 @@
 from distutils.core import setup
 import os
 
-from tonic.lastmodified import *
+from tonic.moduleid import *
 
 NAME = 'python-tonic-library'
 AUTHOR = "Noriyuki Hosaka", "bgnori@gmail.com",
 VERSION = open("VERSION").read().strip()
 DESCRIPTION = 'collection of small codes. "tonic" library for python'
-try:
-  LONG_DESCRIPTION = open("DESCRIPTION").read()
-except:
-  f = open("DESCRIPTION", 'w')
-  f.write('build id is "%s". \n'%(onMANIFEST(),))
-  f.write("""\
+LONG_DESCRIPTION = 'build id is "%s". \n'%(register(globals()),)+ \
+  """\
 This package contains:
  * turbogears:
   * cc: decorators for cache-control.
@@ -45,9 +41,7 @@ This package contains:
    * using memcache
   * multithread is currently NOT supported
 
-""")
-  f.close()
-  LONG_DESCRIPTION = open("DESCRIPTION").read()
+"""
   
 HOMEPAGE = "http://www.tonic-water.com/"
 
