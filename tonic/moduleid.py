@@ -5,7 +5,7 @@
 # Copyright 2006-2009 Noriyuki Hosaka bgnori@gmail.com
 #
 import os.path
-import sha
+import hashlib
 import glob
 
 def register(g):
@@ -16,7 +16,7 @@ def register(g):
   dir = g.get("__moduleid_basedir__")
   if dir is None:
     dir = os.path.dirname(path)
-  h = sha.new()
+  h = hashlib.sha1()
   px = [path] 
   for n in g.get("__moduleid_deps__", []):
     x = glob.glob(os.path.join(dir, n))
