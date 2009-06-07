@@ -2,13 +2,14 @@
 # -*- coding: us-ascii -*-
 # vim: syntax=python
 #
-# Copyright 2008 Noriyuki Hosaka bgnori@gmail.com
+# Copyright 2008-2009 Noriyuki Hosaka bgnori@gmail.com
 #
 __all__ = ['hub', 'NotInCache']
 
 import sys
 import traceback
-from turbogears.decorator import weak_signature_decorator
+from decorator import decorator
+
 
 class NotInCache(Exception):
   pass
@@ -127,7 +128,7 @@ def memoize(hub, hash_proc=None, preheat_range=None):
         traceback.print_exc(file=sys.stderr)
         v = func(*args, **kws)
       return v
-    return memoize
-  return weak_signature_decorator(entangle)
+    return decorator(memoize, func)
+  return entangle
 
 
