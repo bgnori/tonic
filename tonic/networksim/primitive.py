@@ -48,8 +48,22 @@ class QuadByte(str):
     return '<QuadByte "%s">'%super(QuadByte, self).__str__()
 
   def _bitop(self, other, op):
-    s = socket.ntohl(struct.unpack('<I', self)[0])
-    o = socket.ntohl(struct.unpack('<I', other)[0])
+    #FIXME
+    s = int(socket.ntohl(struct.unpack('<I', self)[0]))
+    o = int(socket.ntohl(struct.unpack('<I', other)[0]))
+    '''
+      Note:
+      it must be safe cast.
+
+      from
+      http://docs.python.org/library/stdtypes.html#typesnumeric
+
+      Conversion from floats using int() or long() truncates 
+      toward zero like the related function, math.trunc(). 
+      Use the function math.floor() to round downward and 
+      math.ceil() to round upward.
+    '''
+
     return QuadByte(struct.pack('<I', socket.htonl(op(s, o))))
 
   def __and__(self, other):
