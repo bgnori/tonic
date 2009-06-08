@@ -40,7 +40,7 @@ class Storage(tonic.cache.Storage):
     p = self._path(key)
     if not os.path.exists(p):
       raise NotInCache
-    f = file(p, 'r')
+    f = open(p, 'r+b')
     try:
       return pickle.load(f)
     finally:
@@ -52,7 +52,7 @@ class Storage(tonic.cache.Storage):
       os.makedirs(os.path.dirname(p))
     except OSError:
       pass
-    f = file(p, 'w')
+    f = open(p, 'w+b')
     try:
       pickle.dump(value, f)
     finally:

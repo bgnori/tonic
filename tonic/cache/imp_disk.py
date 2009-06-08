@@ -30,7 +30,7 @@ class Storage(tonic.cache.StringKeyStorage):
     return os.path.join(self.workdir, str(hash(key)))
 
   def _set(self, key, value, mtime):
-    f = file(self._path(key), 'w')
+    f = open(self._path(key), 'w+b')
     try:
       pickle.dump(value, f)
     finally:
@@ -42,7 +42,7 @@ class Storage(tonic.cache.StringKeyStorage):
     p = self._path(key)
     if not os.path.exists(p):
       raise NotInCache
-    f = file(p, 'r')
+    f = open(p, 'r+b')
     try:
       return pickle.load(f)
     finally:

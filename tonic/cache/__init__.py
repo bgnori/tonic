@@ -54,7 +54,8 @@ class HashableKeyStorage(Storage):
 
 class StringKeyStorage(Storage):
   def checkkeytype(self, key):
-    assert isinstance(key, str)
+    #assert isinstance(key, str)
+    pass
 
 
 '''
@@ -124,7 +125,7 @@ def memoize(hub, hash_proc=None, preheat_range=None):
               func(*a, **k)
         v = func(*args, **kws)
         hub.set(key, v)
-      except Exception, e:
+      except Exception as e:
         traceback.print_exc(file=sys.stderr)
         v = func(*args, **kws)
       return v

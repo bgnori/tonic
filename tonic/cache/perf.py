@@ -11,7 +11,8 @@ import tempfile
 import random
 
 from tonic.cache import hub
-from tonic.cache.imp_memcache import MemcacheTestingServer
+#from tonic.cache.imp_memcache import MemcacheTestingServer
+from tonic.cache.imp import *
 
 
 class Perf(object):
@@ -48,9 +49,9 @@ class Perf(object):
       self.to_get += self.time_get(key)
 
   def report(self):
-    print '='*10, self.__class__.__name__, '='*10
-    print 'set:', self.to_set / self.count
-    print 'get:', self.to_get / self.count
+    print(('='*10, self.__class__.__name__, '='*10))
+    print(('set:', self.to_set / self.count))
+    print(('get:', self.to_get / self.count))
 
   def run(self):
     self.load()
@@ -74,29 +75,29 @@ class PerfMemcached(Perf):
 
 class PerfDict(Perf):
   def setUp(self):
-    hub.connect('dict')
+    hub.connect(Dict())
   def tearDown(self):
     hub.purge()
 
 class PerfDisk(Perf):
   def setUp(self):
     self.workdir = tempfile.mkdtemp()
-    hub.connect('disk', self.workdir)
+    hub.connect(Disk(self.workdir))
   def tearDown(self):
     hub.purge()
     hub.close()
     os.rmdir(self.workdir)
 
 
-#hub.connect('file', workdir=tempfile.mkdtemp())
+hub.connect(File(workdir=tempfile.mkdtemp()))
 
 pdisk = PerfDisk(10**4)
 pdisk.run()
 pdisk.report()
 
-pm = PerfMemcached(10**4)
-pm.run()
-pm.report()
+#pm = PerfMemcached(10**4)
+#pm.run()
+#pm.report()
 
 pdict = PerfDict(10**4)
 pdict.run()

@@ -4,6 +4,9 @@
 #
 # Copyright 2008 Noriyuki Hosaka bgnori@gmail.com
 #
+'''
+memcache is not available in py3k yet.
+
 import time
 import memcache
 
@@ -75,3 +78,4 @@ class MemcacheTestingServer(object):
     os.kill(self.pid, signal.SIGKILL)
 
 
+'''
