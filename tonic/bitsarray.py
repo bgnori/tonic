@@ -13,7 +13,7 @@ def byte_length(length_in_bit):
     roundup = 1
   else:
     roundup = 0
-  return length_in_bit / bits_in_byte + roundup
+  return length_in_bit // bits_in_byte + roundup
 
 
 class BitsArray(object):
@@ -26,7 +26,7 @@ class BitsArray(object):
                          %(len(binary), size))
       self.binary = binary
     else:
-      self.binary = '\x00'*byte_length(self.size)
+      self.binary = b'\x00'*byte_length(self.size)
     if endian:
       self.endian = endian
     else:
@@ -44,8 +44,8 @@ class BitsArray(object):
       mask = mask << 1
     return ret
 
-  def __nonzero__(self):
-    return int(self)
+  def __bool__(self):
+    return int(self) != 0
 
   def set_shiftable(self, value, begin, end):
     d = value
@@ -54,7 +54,9 @@ class BitsArray(object):
       self[n] = m
 
   def _getbyte(self, pos_of_byte):
-    return struct.unpack(self.struct_format, self.binary[pos_of_byte])[0]
+    return struct.unpack(self.struct_format, 
+                         bytes((self.binary[pos_of_byte],))
+                        )[0]
   
   def _setbyte(self, pos_of_byte, value):
     self.binary = (self.binary[:pos_of_byte]
@@ -75,7 +77,7 @@ class BitsArray(object):
     assert(isinstance(nth, int))
     if 0 >  nth or nth >= self.size:
       raise IndexError('out of range')
-    return (nth/bits_in_byte, self._pos_in_byte(nth%bits_in_byte))
+    return (nth//bits_in_byte, self._pos_in_byte(nth%bits_in_byte))
 
   def getnth(self, nth):
     pos_of_byte, pos_in_byte = self._getpos(nth)
