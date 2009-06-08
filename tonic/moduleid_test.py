@@ -5,7 +5,6 @@
 # Copyright 2009 Noriyuki Hosaka bgnori@gmail.com
 #
 import unittest
-import StringIO
 
 from tonic.moduleid import *
 
