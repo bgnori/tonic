@@ -22,13 +22,12 @@ class RegExpCompositionMeta(type):
     cls.regexp = re.compile(cls.regexp_str)
 
 
-class LineParser(object):
-  __metaclass__ = RegExpCompositionMeta
+class LineParser(object, metaclass=RegExpCompositionMeta):
   _first = EMPTY
   _last = EMPTY
   def parse(self, line):
     for matchobj in self.regexp.finditer(line):
-      for name, match in matchobj.groupdict().items():
+      for name, match in list(matchobj.groupdict().items()):
         if match:
           handler_name = 'handle_' + name
           handler = getattr(self, handler_name, None)
