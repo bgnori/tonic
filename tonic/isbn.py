@@ -41,6 +41,8 @@ class ISBN(object):
   def __eq__(self, other):
     return self.value == other.value
 
+  def __str__(self):
+    return self.value + self.check
 
 class ISBN10(ISBN):
   pattern = re.compile('(?P<value>\d{9})(?P<check>(\d|X))')
@@ -88,5 +90,12 @@ class Reader(object):
   def get(self):
     return self._s
     
+
+if __name__ == '__main__':
+  import sys
+  r = Reader()
+  r.read(sys.stdin)
+  for item in r.get():
+    print item
 
 
