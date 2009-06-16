@@ -38,6 +38,9 @@ class ISBN(object):
   def __hash__(self):
     return hash(self.value)
 
+  def __eq__(self, other):
+    return self.value == other.value
+
 
 class ISBN10(ISBN):
   pattern = re.compile('(?P<value>\d{9})(?P<check>(\d|X))')
@@ -65,6 +68,25 @@ class ISBN13(ISBN):
       parity += int(d) * (1+2*(i%2))
     return '01234567890'[10 - ( parity % 10 )]
 
-
+class Reader(object):
+  def __init__(self):
+    self._s = set()
+  def read(self, f):
+    for line in f:
+      try:
+        isbn = ISBN13(line)
+        self._s.add(isbn)
+        continue
+      except ValueError:
+        pass
+      try:
+        isbn = convert(ISBN10(line))
+        self._s.add(isbn)
+      except ValueError:
+        pass
+      
+  def get(self):
+    return self._s
+    
 
 

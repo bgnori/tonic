@@ -36,9 +36,14 @@ class ISBN10Test(unittest.TestCase):
   def test_hash(self):
     isbn = ISBN10('4101092052')
     hash(isbn)
+    self.assertEqual(
+        hash(ISBN10('4101092052')),
+        hash(ISBN10('4101092052'))
+    )
     d = {}
     d[isbn] = 0
-
+    s = set((ISBN10('4101092052'),))
+    self.assert_(ISBN10("4101092052") in s)
 
 class ISBN13Test(unittest.TestCase):
   def test_cls_isvalid_foobar(self):
@@ -67,11 +72,38 @@ class ISBN13Test(unittest.TestCase):
   def test_hash(self):
     isbn = ISBN13('9784101092058')
     hash(isbn)
+    self.assertEqual(
+        hash(ISBN13('9784101092058')),
+        hash(ISBN13('9784101092058'))
+    )
     d = {}
     d[isbn] = 0
+    s = set((ISBN13('9784101092058'),))
+    self.assert_(ISBN13("9784101092058") in s)
+
 
   def convert_test(self):
     x = ISBN10('4101092052')
     y = convert(x)
     self.assertEqual(y.value, '978410109205')
+
+import StringIO
+
+class ReaderTest(unittest.TestCase):
+  def setUp(self):
+    self.reader = Reader()
+  def test(self):
+    f = StringIO.StringIO("\n"
+                          "9784101092058\n"
+                          "9784101092058\n"
+                          "4101092052\n"
+                          "0000000000000\n"
+                         )
+    self.reader.read(f)
+    s = self.reader.get()
+    print s
+    self.assert_(isinstance(s, set))
+    self.assert_(ISBN13('9784101092058') in s)
+    self.assert_(ISBN13('0000000000000') in s)
+
 
