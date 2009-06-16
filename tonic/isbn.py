@@ -47,7 +47,7 @@ class ISBN10(ISBN):
     parity = 0
     for i, d in enumerate(s[:9]):
       parity += int(d) * (10 - i)
-    return '0123456789X'[(11 - parity % 11 )]
+    return '0123456789X0'[11 - ( parity % 11 )]
 
 
 def convert(isbn10):
@@ -63,7 +63,7 @@ class ISBN13(ISBN):
     parity = 0
     for i, d in enumerate(s):
       parity += int(d) * (1+2*(i%2))
-    return str(10 - parity % 10)
+    return '01234567890'[10 - ( parity % 10 )]
 
 
 
