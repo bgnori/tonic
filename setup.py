@@ -14,8 +14,7 @@ NAME = 'python-tonic-library'
 AUTHOR = "Noriyuki Hosaka", "bgnori@gmail.com",
 VERSION = open("VERSION").read().strip()
 DESCRIPTION = 'collection of small codes. "tonic" library for python'
-LONG_DESCRIPTION = 'build id is "%s". \n'%(register(globals()),)+ \
-  """\
+LONG_DESCRIPTION = """\
 This package contains:
  * turbogears:
   * cc: decorators for cache-control.
