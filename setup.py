@@ -83,7 +83,7 @@ setup(
   ],
   author=AUTHOR[0],
   author_email=AUTHOR[1],
-  url="http://github.com/bgnori/tonic"
+  url="http://github.com/bgnori/tonic",
   license="Apache 2.0 Lisence",
   provides=['tonic'],
   classifiers=[
