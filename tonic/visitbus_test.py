@@ -8,7 +8,7 @@ import unittest
 import re
 import sys
 
-import elementtree.ElementTree as ET
+import xml.etree.ElementTree as ET
 
 from tonic.cache import hub
 from tonic.cache.imp import Dict 

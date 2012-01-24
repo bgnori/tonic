@@ -6,9 +6,6 @@
 #
 
 from setuptools import setup
-#from distutils.core import setup
-
-import os
 
 NAME = 'python-tonic-library'
 AUTHOR = "Noriyuki Hosaka", "bgnori@gmail.com",
@@ -16,20 +13,8 @@ VERSION = open("VERSION").read().strip()
 DESCRIPTION = 'collection of small codes. "tonic" library for python'
 LONG_DESCRIPTION = """\
 This package contains:
- * turbogears:
-  * cc: decorators for cache-control.
-  * widget: original widgets.
-
  * lineparser
   * parsing line oriented data.
-
- * moduleid 
-  * calc moduleid based sha1 on content of __file__
-
- * specedit
-  * reader/writer for spef file of RPM.
-  * It uses elementtree a.k.a xml.etree in python 2.5 or later, for intermediate expression.
-  * It uses feature in originally packaged elementtree for testing.
 
  * cache
   * interface/implementation for cache something. 
@@ -39,6 +24,17 @@ This package contains:
    * using file (key for get/set must be valid path)
    * using memcache
   * multithread is currently NOT supported
+
+ * math related
+  * combination
+
+ * funny
+  * __dict__/__setattr__ joke
+
+ * other
+  * feedhelper => will move out as app
+  * 
+
 
 """
   
@@ -64,8 +60,6 @@ setup(
             'tonic.depot',
             'tonic.feedhelper',
             'tonic.markups',
-            'tonic.specedit',
-            'tonic.tg',
            ],
   package_data = {},
   py_modules=[
@@ -75,10 +69,7 @@ setup(
             'tonic.visitbus',
             'tonic.bitsarray',
   ],
-  install_requires = [
-    "python>=2.4",
-    "python-elementtree>=1.3.a3", 
-  ],
+  install_requires=open('freeze.txt').readlines(),
   author=AUTHOR[0],
   author_email=AUTHOR[1],
   url="http://github.com/bgnori/tonic",
@@ -88,12 +79,10 @@ setup(
       "Development Status :: 3 - Alpha",
       "Operating System :: OS Independent",
       "Intended Audience :: Developers",
-      "Framework :: TurboGears",
       "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
       "Topic :: Text Processing",
       "Topic :: Software Development",
       "Topic :: System :: Archiving :: Packaging",
-      "Topic :: Software Development :: Build Tools",
       ]
 )
 
