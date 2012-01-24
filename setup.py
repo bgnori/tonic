@@ -77,7 +77,6 @@ setup(
   ],
   install_requires = [
     "python>=2.4",
-    "TurboGears>=1.0.0",
     "python-elementtree>=1.3.a3", 
   ],
   author=AUTHOR[0],
