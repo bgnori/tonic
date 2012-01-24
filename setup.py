@@ -5,10 +5,10 @@
 # Copyright 2006-2008 Noriyuki Hosaka bgnori@gmail.com
 #
 
-from distutils.core import setup
-import os
+from setuptools import setup
+#from distutils.core import setup
 
-from tonic.moduleid import *
+import os
 
 NAME = 'python-tonic-library'
 AUTHOR = "Noriyuki Hosaka", "bgnori@gmail.com",
@@ -43,7 +43,6 @@ This package contains:
 
 """
   
-HOMEPAGE = "http://www.tonic-water.com/"
 
 
 try:
@@ -76,7 +75,6 @@ setup(
             'tonic.combination',
             'tonic.visitbus',
             'tonic.bitsarray',
-            'tonic.moduleid',
   ],
   install_requires = [
     "python>=2.4",
@@ -85,9 +83,9 @@ setup(
   ],
   author=AUTHOR[0],
   author_email=AUTHOR[1],
-  url=HOMEPAGE,
+  url="http://github.com/bgnori/tonic"
   license="Apache 2.0 Lisence",
-  provides=['python-tonic-library'],
+  provides=['tonic'],
   classifiers=[
       "Development Status :: 3 - Alpha",
       "Operating System :: OS Independent",
