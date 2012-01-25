@@ -6,4 +6,5 @@ elementtree==1.2.7-20070827-preview
 feedparser==5.0.1
 nose==1.1.2
 python-memcached==1.47
+-e git+git@github.com:bgnori/tonic.git@e6e3a42b3ac291088b1a4bd41ae6d81918f022fa#egg=python_tonic_library-dev
 wsgiref==0.1.2
