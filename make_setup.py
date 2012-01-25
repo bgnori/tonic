@@ -56,7 +56,7 @@ except:
 
 setup(
   name={NAME},
-  version={VERSION},
+  version="{VERSION}",
   zip_safe=False,
   description={DESCRIPTION},
   long_description={LONG_DESCRIPTION},

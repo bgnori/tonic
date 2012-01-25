@@ -14,7 +14,7 @@ except:
 
 setup(
   name=python-tonic-library,
-  version=0.0.16,
+  version="0.0.16",
   zip_safe=False,
   description=collection of small codes. "tonic" library for python,
   long_description=This package contains:
