@@ -3,7 +3,7 @@
 #	source mypython/bin/activate
 #
 
-.PHONY: evn test clean
+.PHONY: evn test clean chpck chpck_clean
 
 env:
 	pip install -r freeze.txt
@@ -19,3 +19,10 @@ setup.py: freeze.txt
 
 freeze.txt:
 	pip freeze > freeze.txt
+
+chpck:
+	cd ./packaging/; make test
+
+chpck_clean:
+	cd ./packaging/; make clean
+	
