@@ -55,11 +55,11 @@ except:
     pass
 
 setup(
-  name={NAME},
+  name="{NAME}",
   version="{VERSION}",
   zip_safe=False,
-  description={DESCRIPTION},
-  long_description={LONG_DESCRIPTION},
+  description="""{DESCRIPTION}""",
+  long_description="""{LONG_DESCRIPTION}""",
   package_dir={{'tonic':'tonic', }},
   packages=['tonic',
             'tonic.cache',
@@ -75,9 +75,9 @@ setup(
             'tonic.visitbus',
             'tonic.bitsarray',
   ],
-  install_requires= {install_requires}
-  author={AUTHOR},
-  author_email={AUTHOR_EMAIL},
+  install_requires= {install_requires},
+  author="{AUTHOR}",
+  author_email="{AUTHOR_EMAIL}",
   url="http://github.com/bgnori/tonic",
   license="Apache 2.0 Lisence",
   provides=['tonic'],

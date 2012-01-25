@@ -13,11 +13,11 @@ except:
     pass
 
 setup(
-  name=python-tonic-library,
+  name="python-tonic-library",
   version="0.0.16",
   zip_safe=False,
-  description=collection of small codes. "tonic" library for python,
-  long_description=This package contains:
+  description="""collection of small codes. "tonic" library for python""",
+  long_description="""This package contains:
  * lineparser
   * parsing line oriented data.
 
@@ -39,7 +39,7 @@ setup(
  * other
   * feedhelper => will move out as app
   * 
-,
+""",
   package_dir={'tonic':'tonic', },
   packages=['tonic',
             'tonic.cache',
@@ -55,9 +55,9 @@ setup(
             'tonic.visitbus',
             'tonic.bitsarray',
   ],
-  install_requires= ['BeautifulSoup==3.2.0\n', 'ClientForm==0.2.10\n', 'decorator==3.3.2\n', 'distribute==0.6.19\n', 'elementtree==1.2.7-20070827-preview\n', 'feedparser==5.0.1\n', 'nose==1.1.2\n', 'python-memcached==1.47\n', '-e git+git@github.com:bgnori/tonic.git@e6e3a42b3ac291088b1a4bd41ae6d81918f022fa#egg=python_tonic_library-dev\n', 'wsgiref==0.1.2\n']
-  author=Noriyuki Hosaka,
-  author_email=bgnori@gmail.com,
+  install_requires= ['BeautifulSoup==3.2.0\n', 'ClientForm==0.2.10\n', 'decorator==3.3.2\n', 'distribute==0.6.19\n', 'elementtree==1.2.7-20070827-preview\n', 'feedparser==5.0.1\n', 'nose==1.1.2\n', 'python-memcached==1.47\n', 'wsgiref==0.1.2\n'],
+  author="Noriyuki Hosaka",
+  author_email="bgnori@gmail.com",
   url="http://github.com/bgnori/tonic",
   license="Apache 2.0 Lisence",
   provides=['tonic'],
